@@ -1,0 +1,4 @@
+[build]
+  base    = "trama"
+  command = "npm run build"
+  publish = "trama/dist"
