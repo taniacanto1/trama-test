@@ -1,0 +1,576 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 40px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.readingSection + .section {
+  margin-top: 24px;
+}
+
+/* ── Section layout ── */
+.section { display: flex; flex-direction: column; gap: 12px; }
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shelfHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.verTodo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 150ms;
+}
+.verTodo:hover { opacity: 0.75; }
+
+/* ── Shared card shell ── */
+.sectionCard {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(44,36,32,0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Chevron button (shared) ── */
+.chevronBtn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(44,36,32,0.08);
+  backdrop-filter: blur(6px);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.chevronBtn:hover { background: rgba(44,36,32,0.14); color: var(--text-primary); }
+.chevronBtn svg { width: 16px; height: 16px; }
+
+/* ══════════════════════════════════════
+   ESTOY LEYENDO
+══════════════════════════════════════ */
+.readingSection {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.readingCard {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+}
+
+.bookCover {
+  width: 120px;
+  height: 174px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.bookInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.bookHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bookTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.bookAuthor {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.streakBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(154,196,158,0.22);
+  border: 1px solid #8da890;
+  border-radius: 9999px;
+  color: #5a7a60;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.streakBadge svg { color: #5a7a60; }
+
+/* Progress */
+.progressBox {
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(44,36,32,0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.progressLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.progressPages {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+}
+
+.progressBarTrack {
+  height: 18px;
+  border-radius: 34px;
+  border: 1px solid #af8a78;
+  overflow: hidden;
+  background: rgba(255,255,255,0.3);
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 34px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.4) 0%, rgba(247,212,196,0.6) 30%, rgba(238,169,137,0.7) 60%, rgba(223,92,32,0.85) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  transition: width 600ms ease-out;
+}
+
+.progressPct {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ce4100;
+  letter-spacing: 0.06em;
+}
+
+/* Action buttons */
+.bookActions {
+  display: flex;
+  gap: 16px;
+}
+
+.btnOutline {
+  padding: 8px 20px;
+  border: 1.5px solid var(--orange);
+  border-radius: 20px;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.btnOutline:hover { background: rgba(232,107,48,0.06); }
+
+.btnFill {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 20px;
+  background: var(--orange);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: background 150ms;
+}
+.btnFill:hover { background: var(--orange-dark); }
+
+/* ══════════════════════════════════════
+   ESTANTERÍA
+══════════════════════════════════════ */
+.filterTabs {
+  display: flex;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(44,36,32,0.2);
+  border-radius: 20px;
+  padding: 6px 8px;
+}
+
+.filterTab {
+  padding: 7px 18px;
+  border-radius: 16px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 150ms;
+}
+.filterTab:hover { color: var(--text-primary); border-color: rgba(44,36,32,0.2); }
+.filterTabActive {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.shelfCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 16px;
+}
+
+.shelfGrid {
+  display: flex;
+  gap: 36px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.shelfBook {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 110px;
+  cursor: pointer;
+  position: relative;
+}
+
+.shelfBook::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 110px;
+  height: 160px;
+  border-radius: 8px;
+  background: linear-gradient(to bottom, transparent 30%, rgba(232,107,48,0.75) 100%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+.shelfBook:hover::after { opacity: 1; }
+.shelfBook:hover .shelfCover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.25); }
+
+.shelfCover {
+  width: 110px;
+  height: 160px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.shelfTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shelfAuthor {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════
+   LISTAS
+══════════════════════════════════════ */
+.listasCard {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+}
+
+.listaItem {
+  flex: 1;
+  border: 1px solid rgba(44,36,32,0.18);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: box-shadow 150ms, transform 150ms;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-card);
+}
+.listaItem:hover { box-shadow: 0 6px 20px rgba(44,36,32,0.12); transform: translateY(-2px); }
+
+.listaCollage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.listaCollageImg {
+  overflow: hidden;
+}
+.listaCollageImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.listaText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.listaName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.listaCount { font-size: 12px; color: var(--text-tertiary); font-weight: 400; }
+
+.listaNueva {
+  flex: 0 0 180px;
+  border: 1.5px dashed rgba(44,36,32,0.2);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+.listaNueva:hover { border-color: var(--orange); background: rgba(232,107,48,0.03); }
+
+.listaNuevaIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(44,36,32,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: border-color 150ms, color 150ms;
+}
+.listaNueva:hover .listaNuevaIcon { border-color: var(--orange); color: var(--orange); }
+.listaNuevaIcon svg { width: 18px; height: 18px; }
+
+.listaNuevaText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ══════════════════════════════════════
+   PROGRESOS
+══════════════════════════════════════ */
+.progresosGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.4fr;
+  gap: 14px;
+}
+
+.progresosCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  gap: 18px;
+}
+
+.progresosColTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.progresosDivider { display: none; }
+
+/* Annual goal circle */
+.goalCircleOuter {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.goalCircleInner {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.goalNumber {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+.goalLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.goalCompleted {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Bar chart */
+.barChart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  width: 100%;
+  padding: 0 4px;
+}
+.barCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-end;
+}
+.bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: #e8a882;
+  min-height: 4px;
+  transition: height 400ms ease-out;
+}
+.barToday { background: var(--orange); }
+.barLabel {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+.barLabelToday { color: var(--orange); font-weight: 700; }
+
+.chartStats {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid rgba(44,36,32,0.08);
+  gap: 8px;
+}
+.chartStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.chartStatNum {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.chartStatGreen { color: #5a8a6a; }
+.chartStatLabel {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Genre bars */
+.genreList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.genreItem { display: flex; flex-direction: column; gap: 5px; }
+.genreRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.genreName { font-size: 15px; color: var(--text-primary); }
+.genrePct  { font-size: 13px; color: var(--text-tertiary); }
+.genreTrack {
+  height: 5px;
+  background: #ede8e1;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.genreFill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 600ms ease-out;
+}

@@ -1,0 +1,106 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 40px 160px;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 20px 0 52px;
+}
+.hero h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 380px;
+  margin: 0 auto 22px;
+  padding: 10px 18px;
+  border: 1.5px solid rgba(44,36,32,0.2);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.searchBar svg { width: 16px; height: 16px; color: var(--text-tertiary); flex-shrink: 0; }
+.searchBar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: transparent;
+}
+.searchBar input::placeholder { color: var(--text-tertiary); }
+
+.recomendadorBtn {
+  padding: 8px 22px;
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms, transform 100ms;
+}
+.recomendadorBtn:hover { background: var(--orange-dark); transform: scale(1.02); }
+
+/* Sections */
+.section { margin-bottom: 52px; }
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.highlight { color: var(--orange); }
+.sectionLink {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 150ms;
+}
+.sectionLink:hover { color: var(--orange); }
+.sectionLink svg { width: 14px; height: 14px; }
+
+/* Card grid */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Scroll hint */
+.scrollHint {
+  text-align: center;
+  padding: 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  animation: bounce 2s ease-in-out infinite;
+  margin-bottom: 8px;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
