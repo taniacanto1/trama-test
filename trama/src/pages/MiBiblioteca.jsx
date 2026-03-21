@@ -2,7 +2,7 @@ import styles from './MiBiblioteca.module.css';
 
 /* ── Data ── */
 const currentBook = {
-  cover: 'https://covers.openlibrary.org/b/isbn/0756404738-L.jpg',
+  cover: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1270352123i/186074.jpg',
   title: 'El nombre del viento',
   author: 'Patrick Rothfuss',
   streak: 12,
@@ -10,13 +10,14 @@ const currentBook = {
   totalPages: 550,
 };
 
+const OL = 'https://covers.openlibrary.org/b/isbn';
 const shelfBooks = [
-  { id: 1, cover: 'https://covers.openlibrary.org/b/isbn/9780553385533-L.jpg', title: 'Fuego y Sangre', author: 'G.R.R. Martin' },
-  { id: 2, cover: 'https://covers.openlibrary.org/b/isbn/9780451477682-L.jpg', title: 'El encuadernador', author: 'Genevieve Cogman' },
-  { id: 3, cover: 'https://covers.openlibrary.org/b/isbn/9781250301697-L.jpg', title: 'Donde cantan los árboles', author: 'Kerstin Gier' },
-  { id: 4, cover: 'https://covers.openlibrary.org/b/isbn/9781501161933-L.jpg', title: 'Los siete maridos de Evelyn Hugo', author: 'Taylor Jenkins Reid' },
-  { id: 5, cover: 'https://covers.openlibrary.org/b/isbn/9780439708180-L.jpg', title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling' },
-  { id: 6, cover: 'https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg', title: 'El principito', author: 'Antoine de Saint-Exupéry' },
+  { id: 1, cover: `${OL}/0756404738-L.jpg`,      title: 'El nombre del viento',             author: 'Patrick Rothfuss' },
+  { id: 2, cover: `${OL}/9780547928227-L.jpg`,   title: 'El hobbit',                        author: 'J.R.R. Tolkien' },
+  { id: 3, cover: `${OL}/9780439708180-L.jpg`,   title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling' },
+  { id: 4, cover: `${OL}/9780451524935-L.jpg`,   title: '1984',                             author: 'George Orwell' },
+  { id: 5, cover: `${OL}/9780060883287-L.jpg`,   title: 'Cien años de soledad',             author: 'Gabriel García Márquez' },
+  { id: 6, cover: `${OL}/9780156012195-L.jpg`,   title: 'El principito',                    author: 'Antoine de Saint-Exupéry' },
 ];
 
 const lists = [
