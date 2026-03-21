@@ -34,7 +34,10 @@ const NAV_LINKS = [
   { label: 'Comunidad',     page: 'comunidad',  icon: <PeopleIcon /> },
 ];
 
+const activePage = (current) => current === 'libro' ? 'explorar' : current;
+
 export default function NavbarFull({ hidden, currentPage, onNavigate }) {
+  const active = activePage(currentPage);
   return (
     <nav className={`${styles.navbar} ${hidden ? styles.hidden : ''}`}>
       <a className={styles.logo} href="#" onClick={e => { e.preventDefault(); onNavigate('explorar'); }}>
@@ -47,7 +50,7 @@ export default function NavbarFull({ hidden, currentPage, onNavigate }) {
           <li key={page}>
             <a
               href="#"
-              className={currentPage === page ? styles.active : ''}
+              className={active === page ? styles.active : ''}
               onClick={e => { e.preventDefault(); onNavigate(page); }}
             >
               {icon}

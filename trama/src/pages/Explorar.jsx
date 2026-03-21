@@ -35,7 +35,7 @@ function Section({ title, linkText = 'Ver más', children }) {
   );
 }
 
-export default function Explorar() {
+export default function Explorar({ onNavigate }) {
   return (
     <main className={styles.page}>
       <p className={styles.scrollHint}>↓ Haz scroll para ver la transición del navbar ↓</p>
@@ -51,27 +51,39 @@ export default function Explorar() {
       </div>
 
       <Section title="Tendencias esta semana">
-        {tendencias.map(b => <BookCard key={b.id} {...b} />)}
+        {tendencias.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
 
       <Section title={<>Porque has leído: <span className={styles.highlight}>Las Gratitudes</span></>}>
-        {porqueHasLeido.map(b => <BookCard key={b.id} {...b} />)}
+        {porqueHasLeido.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
 
       <Section title={<>Destacados de <span className={styles.highlight}>Fantasía</span></>}>
-        {destacadosFantasia.map(b => <BookCard key={b.id} {...b} />)}
+        {destacadosFantasia.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
 
       <Section title="Últimos lanzamientos">
-        {ultimosLanzamientos.map(b => <BookCard key={b.id} {...b} />)}
+        {ultimosLanzamientos.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
 
       <Section title={<>Más historias como <span className={styles.highlight}>El Nombre del Viento</span></>}>
-        {masHistorias.map(b => <BookCard key={b.id} {...b} />)}
+        {masHistorias.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
 
       <Section title="Los mejor valorados de tu estilo">
-        {mejorValorados.map(b => <BookCard key={b.id} {...b} />)}
+        {mejorValorados.map(b => (
+          <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+        ))}
       </Section>
     </main>
   );

@@ -3,7 +3,7 @@ import styles from './BookCard.module.css';
 
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
 
-export default function BookCard({ cover, tag, title, author, rating, reviews, rank }) {
+export default function BookCard({ cover, tag, title, author, rating, reviews, rank, onNavigate }) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(null);
   const ref = useRef(null);
@@ -35,7 +35,7 @@ export default function BookCard({ cover, tag, title, author, rating, reviews, r
           </p>
         </div>
         <div className={styles.cardActions}>
-          <button className={styles.btnVer}>Ver libro</button>
+          <button className={styles.btnVer} onClick={onNavigate}>Ver libro</button>
           <div className={styles.saveWrapper} ref={ref}>
             <button
               className={`${styles.saveBtn} ${(saved || open) ? styles.saveBtnActive : ''}`}

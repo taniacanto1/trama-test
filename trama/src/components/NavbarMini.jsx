@@ -27,8 +27,11 @@ const ITEMS = [
 const STYLES = ['glass', 'warm', 'dark'];
 const STYLE_LABELS = ['A · Glass blur', 'B · Naranja', 'C · Oscuro'];
 
+const activePage = (current) => current === 'libro' ? 'explorar' : current;
+
 export default function NavbarMini({ visible, currentPage, onNavigate }) {
   const [pillStyle, setPillStyle] = useState('glass');
+  const active = activePage(currentPage);
 
   return (
     <>
@@ -49,7 +52,7 @@ export default function NavbarMini({ visible, currentPage, onNavigate }) {
         {ITEMS.map(({ label, page, icon }) => (
           <button
             key={page}
-            className={`${styles.item} ${currentPage === page ? styles.itemActive : ''}`}
+            className={`${styles.item} ${active === page ? styles.itemActive : ''}`}
             onClick={() => onNavigate(page)}
           >
             {icon}

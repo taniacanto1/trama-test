@@ -3,6 +3,7 @@ import NavbarFull from './components/NavbarFull';
 import NavbarMini from './components/NavbarMini';
 import Explorar from './pages/Explorar';
 import MiBiblioteca from './pages/MiBiblioteca';
+import DetalleLibro from './pages/DetalleLibro';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -26,8 +27,9 @@ export default function App() {
     <>
       <NavbarFull hidden={scrolled} currentPage={currentPage} onNavigate={navigate} />
       <NavbarMini visible={scrolled} currentPage={currentPage} onNavigate={navigate} />
-      {currentPage === 'explorar'   && <Explorar />}
-      {currentPage === 'biblioteca' && <MiBiblioteca />}
+      {currentPage === 'explorar'   && <Explorar onNavigate={navigate} />}
+      {currentPage === 'biblioteca' && <MiBiblioteca onNavigate={navigate} />}
+      {currentPage === 'libro'      && <DetalleLibro onNavigate={navigate} />}
     </>
   );
 }

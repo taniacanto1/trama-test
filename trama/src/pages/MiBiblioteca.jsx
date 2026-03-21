@@ -77,14 +77,20 @@ function SectionCard({ children, className = '' }) {
 
 /* ── Sections ── */
 
-function EstoyLeyendo() {
+function EstoyLeyendo({ onNavigate }) {
   const progress = Math.round((currentBook.currentPage / currentBook.totalPages) * 100);
 
   return (
     <section className={`${styles.section} ${styles.readingSection}`}>
       <h2 className={styles.sectionTitle}>Estoy leyendo...</h2>
       <SectionCard className={styles.readingCard}>
-        <img className={styles.bookCover} src={currentBook.cover} alt={currentBook.title} />
+        <img
+          className={styles.bookCover}
+          src={currentBook.cover}
+          alt={currentBook.title}
+          onClick={() => onNavigate?.('libro')}
+          style={{ cursor: 'pointer' }}
+        />
 
         <div className={styles.bookInfo}>
           <div className={styles.bookHeader}>
@@ -124,24 +130,22 @@ function EstoyLeyendo() {
   );
 }
 
-function Estanteria() {
+function Estanteria({ onNavigate }) {
   return (
     <section className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <div className={styles.shelfHeaderLeft}>
-          <h2 className={styles.sectionTitle}>Estantería</h2>
-          <div className={styles.filterTabs}>
-            {SHELF_FILTERS.map((f, i) => (
-              <button key={f} className={`${styles.filterTab} ${i === 0 ? styles.filterTabActive : ''}`}>{f}</button>
-            ))}
-          </div>
+      <h2 className={styles.sectionTitle}>Estantería</h2>
+      <div className={styles.shelfSubHeader}>
+        <div className={styles.filterTabs}>
+          {SHELF_FILTERS.map((f, i) => (
+            <button key={f} className={`${styles.filterTab} ${i === 0 ? styles.filterTabActive : ''}`}>{f}</button>
+          ))}
         </div>
         <a href="#" className={styles.verTodo}>Ver todo</a>
       </div>
       <SectionCard className={styles.shelfCard}>
         <div className={styles.shelfGrid}>
           {shelfBooks.map(book => (
-            <div key={book.id} className={styles.shelfBook}>
+            <div key={book.id} className={styles.shelfBook} onClick={() => onNavigate?.('libro')} style={{ cursor: 'pointer' }}>
               <img className={styles.shelfCover} src={book.cover} alt={book.title} />
               <p className={styles.shelfTitle}>{book.title}</p>
               <p className={styles.shelfAuthor}>{book.author}</p>
@@ -260,11 +264,11 @@ function Progresos() {
 }
 
 /* ── Page ── */
-export default function MiBiblioteca() {
+export default function MiBiblioteca({ onNavigate }) {
   return (
     <main className={styles.page}>
-      <EstoyLeyendo />
-      <Estanteria />
+      <EstoyLeyendo onNavigate={onNavigate} />
+      <Estanteria onNavigate={onNavigate} />
       <Listas />
       <Progresos />
     </main>
