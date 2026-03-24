@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './DetalleLibro.module.css';
 import BookCard from '../components/BookCard';
 
@@ -174,17 +174,29 @@ function SynopsisModal({ text, onClose }) {
   );
 }
 
+const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
+
 export default function DetalleLibro({ onNavigate }) {
-  const [saved, setSaved] = useState(false);
+  const [shelfOpen, setShelfOpen] = useState(false);
+  const [savedShelf, setSavedShelf] = useState(null);
   const [synopsisOpen, setSynopsisOpen] = useState(false);
+  const shelfRef = useRef(null);
+
+  useEffect(() => {
+    if (!shelfOpen) return;
+    const handler = (e) => { if (shelfRef.current && !shelfRef.current.contains(e.target)) setShelfOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [shelfOpen]);
 
   return (
     <main className={styles.page}>
 
+      {synopsisOpen && <SynopsisModal text={book.synopsis} onClose={() => setSynopsisOpen(false)} />}
+
       {/* ══ Sección info libro ══ */}
       <section className={styles.infoSection}>
         <div className={styles.infoCard}>
-          {synopsisOpen && <SynopsisModal text={book.synopsis} onClose={() => setSynopsisOpen(false)} />}
           <div className={styles.coverWrap}>
             <img className={styles.cover} src={book.cover} alt={book.title} />
             <div className={styles.coverOverlay}>
@@ -243,12 +255,43 @@ export default function DetalleLibro({ onNavigate }) {
             </div>
 
             <div className={styles.cardFooter}>
-              <button
-                className={`${styles.saveBtn} ${saved ? styles.saveBtnSaved : ''}`}
-                onClick={() => setSaved(s => !s)}
-              >
-                {saved ? '✓ Guardado' : 'Guardar libro'}
-              </button>
+              <div className={styles.saveWrapper} ref={shelfRef}>
+                <button
+                  className={`${styles.saveBtn} ${savedShelf && !shelfOpen ? styles.saveBtnSaved : ''} ${shelfOpen ? styles.saveBtnOpen : ''}`}
+                  onClick={() => setShelfOpen(o => !o)}
+                >
+                  {savedShelf && !shelfOpen && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.saveBtnCheck}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                  {savedShelf || 'Guardar libro'}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={styles.saveBtnChevron}>
+                    <polyline points="9 6 15 12 9 18"/>
+                  </svg>
+                </button>
+                {shelfOpen && (
+                  <div className={styles.saveDropdown}>
+                    <ul className={styles.saveDropdownList}>
+                      {SHELF_OPTIONS.map(opt => (
+                        <li key={opt}>
+                          <button
+                            className={`${styles.saveDropdownItem} ${savedShelf === opt ? styles.saveDropdownItemActive : ''}`}
+                            onClick={() => { if (savedShelf === opt) { setSavedShelf(null); } else { setSavedShelf(opt); setShelfOpen(false); } }}
+                          >
+                            {savedShelf === opt && (
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                              </svg>
+                            )}
+                            {opt}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -2,13 +2,13 @@
   display: flex;
   gap: 18px;
   padding: 20px;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(44,36,32,0.2);
-  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-card);
   position: relative;
-  transition: box-shadow 180ms, transform 180ms;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
 }
 .card:hover {
   box-shadow: 0 6px 20px rgba(44,36,32,0.12);
@@ -22,7 +22,7 @@
   inset: 0;
   overflow: hidden;
   pointer-events: none;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
 }
 .rank {
   position: absolute;
@@ -38,7 +38,7 @@
 .cover {
   width: 100px;
   height: 148px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -54,8 +54,8 @@
 
 .tag {
   display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--orange);
@@ -64,25 +64,27 @@
 
 .title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   line-height: 1.25;
   color: var(--text-primary);
+  font-family: var(--font-editorial);
 }
 
 .author {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   margin-top: 4px;
+  font-family: var(--font-editorial);
 }
 
 .rating {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
   margin-top: 8px;
   color: var(--text-primary);
 }
 .star { color: var(--orange); }
-.count { color: var(--text-tertiary); font-weight: 400; font-size: 12px; }
+.count { color: var(--text-tertiary); font-weight: var(--weight-regular); font-size: 12px; }
 
 .cardActions {
   display: flex;
@@ -94,16 +96,19 @@
 .btnVer {
   padding: 8px 20px;
   border: none;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   background: var(--orange);
-  font-family: 'Manrope', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
   color: #fff;
   cursor: pointer;
-  transition: background 150ms;
+  transition: background var(--transition-fast);
 }
 .btnVer:hover { background: var(--orange-dark); }
+.btnVer:active { transform: scale(0.97); }
+.btnVer:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }
+.btnVer:disabled { background: var(--text-tertiary); cursor: not-allowed; transform: none; }
 
 /* ── Save button + dropdown ── */
 .saveWrapper {
@@ -120,26 +125,27 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   border: 1.5px solid rgba(44,36,32,0.22);
   background: rgba(255,255,255,0.85);
   backdrop-filter: blur(6px);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: border-color 150ms, color 150ms, background 150ms;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 }
 .saveBtn:hover { border-color: var(--orange); color: var(--orange); background: rgba(255,255,255,0.95); }
 .saveBtn svg { width: 14px; height: 14px; }
 
 .saveBtnActive { border-color: var(--orange); color: var(--orange); background: rgba(232,107,48,0.08); }
+.saveBtnSaved { border-color: rgba(44,36,32,0.22); color: var(--text-secondary); background: rgba(255,255,255,0.85); }
 
 .dropdown {
   position: absolute;
   bottom: calc(100% + 8px);
   left: 0;
-  background: rgba(250,250,248,0.82);
+  background: rgb(250,250,248);
   border: 1px solid var(--orange);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
   backdrop-filter: blur(20px) saturate(1.4);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
@@ -149,11 +155,18 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  transform-origin: top center;
+  animation: dropdownIn var(--transition-base) ease-out forwards;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .dropdownLabel {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-secondary);
@@ -177,18 +190,19 @@
   width: 100%;
   padding: 7px 13px;
   border: 1.5px solid rgba(44,36,32,0.12);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: transparent;
-  font-family: 'Manrope', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
-  transition: border-color 150ms, color 150ms, background 150ms;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 }
 .dropdownItem:hover { border-color: var(--orange); color: var(--orange); }
 .dropdownItem svg { width: 12px; height: 12px; color: var(--orange); flex-shrink: 0; }
 
-.dropdownItemActive { background: var(--orange); border-color: var(--orange); color: #fff; font-weight: 700; }
+.dropdownItemActive { background: var(--orange); border-color: transparent; color: #fff; font-weight: var(--weight-bold); }
 .dropdownItemActive svg { color: #fff; }
+.dropdownItemActive:hover { color: #fff; background: var(--orange-dark); border-color: transparent; }

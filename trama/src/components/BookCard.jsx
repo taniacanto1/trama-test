@@ -16,7 +16,7 @@ export default function BookCard({ cover, tag, title, author, rating, reviews, r
   }, [open]);
 
   const handleSelect = (option) => {
-    setSaved(option);
+    setSaved(saved === option ? null : option);
     setOpen(false);
   };
 
@@ -38,7 +38,7 @@ export default function BookCard({ cover, tag, title, author, rating, reviews, r
           <button className={styles.btnVer} onClick={onNavigate}>Ver libro</button>
           <div className={styles.saveWrapper} ref={ref}>
             <button
-              className={`${styles.saveBtn} ${(saved || open) ? styles.saveBtnActive : ''}`}
+              className={`${styles.saveBtn} ${open ? styles.saveBtnActive : saved ? styles.saveBtnSaved : ''}`}
               onClick={() => setOpen((o) => !o)}
               aria-label="Guardar libro"
             >
@@ -59,7 +59,6 @@ export default function BookCard({ cover, tag, title, author, rating, reviews, r
 
             {open && (
               <div className={styles.dropdown}>
-                {saved && <p className={styles.dropdownLabel}>Guardado en: <strong>{saved}</strong></p>}
                 <ul className={styles.dropdownList}>
                   {SHELF_OPTIONS.map((opt) => (
                     <li key={opt}>
