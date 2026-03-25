@@ -38,11 +38,9 @@ function Section({ title, linkText = 'Ver más', children }) {
 export default function Explorar({ onNavigate }) {
   return (
     <main className={styles.page}>
-      <p className={styles.scrollHint}>↓ Haz scroll para ver la transición del navbar ↓</p>
-
       {/* Hero */}
       <div className={styles.hero}>
-        <h1>Descubre tu próxima trama</h1>
+        <h2>Descubre tu próxima trama</h2>
         <div className={styles.searchBar}>
           <SearchIcon />
           <input type="text" placeholder="Buscar título, autor o ISBN" />

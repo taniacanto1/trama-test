@@ -86,20 +86,20 @@ function StarRating({ rating, size = 16 }) {
               <>
                 <defs>
                   <linearGradient id={`hg-${i}`}>
-                    <stop offset="50%" stopColor="var(--orange)" />
+                    <stop offset="50%" stopColor="var(--color-brand-primary)" />
                     <stop offset="50%" stopColor="transparent" />
                   </linearGradient>
                 </defs>
                 <path
                   d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                  fill={`url(#hg-${i})`} stroke="var(--orange)" strokeWidth="1.5"
+                  fill={`url(#hg-${i})`} stroke="var(--color-brand-primary)" strokeWidth="1.5"
                 />
               </>
             ) : (
               <path
                 d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                fill={filled ? 'var(--orange)' : 'none'}
-                stroke={filled ? 'var(--orange)' : 'var(--text-tertiary)'}
+                fill={filled ? 'var(--color-brand-primary)' : 'none'}
+                stroke={filled ? 'var(--color-brand-primary)' : 'var(--color-text-tertiary)'}
                 strokeWidth="1.5"
               />
             )}
@@ -301,7 +301,10 @@ export default function DetalleLibro({ onNavigate }) {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <h2 className={styles.sectionTitle}>Reseñas de la comunidad</h2>
-          <a href="#" className={styles.verTodo}>Ver más</a>
+          <a href="#" className={styles.verTodo}>
+            Ver más
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
         </div>
         <div className={styles.reviewsGrid}>
           {reviews.map(r => <ReviewCard key={r.id} {...r} />)}
