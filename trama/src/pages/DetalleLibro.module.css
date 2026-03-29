@@ -69,7 +69,6 @@
   align-self: stretch;
   border-radius: var(--radius-md);
   overflow: hidden;
-  cursor: pointer;
   box-shadow: var(--shadow-cover);
 }
 
@@ -79,29 +78,6 @@
   border-radius: var(--radius-md);
   object-fit: cover;
   display: block;
-  transition: transform var(--transition-base);
-}
-.coverWrap:hover .cover { transform: scale(1.03); }
-
-.coverOverlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, rgba(232, 107, 48, 0.75) 100%);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 20px;
-  border-radius: var(--radius-md);
-}
-.coverWrap:hover .coverOverlay { opacity: 1; }
-
-.coverOverlayText {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
-  color: var(--color-text-on-brand);
-  letter-spacing: 0.04em;
 }
 
 .shareBtn {
@@ -135,9 +111,12 @@
 }
 
 .genre {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-brand-ember);
+  opacity: 0.75;
 }
 
 .title {
@@ -446,16 +425,6 @@
 @keyframes dropdownIn {
   from { opacity: 0; transform: translateX(-6px) scale(0.98); }
   to   { opacity: 1; transform: translateX(0) scale(1); }
-}
-
-.saveDropdownLabel {
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-secondary);
-  padding: 2px 4px 4px;
-  margin: 0;
 }
 
 .saveDropdownList {

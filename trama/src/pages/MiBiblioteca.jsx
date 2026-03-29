@@ -83,11 +83,20 @@ const lists = [
 ];
 
 const genres = [
-  { name: 'Fantasía',  pct: 42, color: 'var(--genre-fiction)' },
-  { name: 'Drama',     pct: 20, color: 'var(--genre-nonfiction)' },
-  { name: 'Histórica', pct: 18, color: 'var(--genre-mystery)' },
-  { name: 'Otros',     pct: 12, color: 'var(--genre-default)' },
+  { name: 'Fantasía',  pct: 42, color: '#8B5CF6' },
+  { name: 'Drama',     pct: 20, color: '#3B82F6' },
+  { name: 'Histórica', pct: 18, color: '#F59E0B' },
+  { name: 'Otros',     pct: 12, color: '#10B981' },
 ];
+
+const genreBookIds = {
+  'Fantasía':  [7, 8, 9],
+  'Drama':     [10, 11, 35, 38, 40],
+  'Histórica': [37, 39],
+  'Otros':     [12, 33, 34, 36],
+};
+
+const bookById = Object.fromEntries(shelfBooks.map(b => [b.id, b]));
 
 const weekActivity = [
   { day: 'LU', pages: 22 },
@@ -134,6 +143,78 @@ function PlusIcon() {
 
 function SectionCard({ children, className = '' }) {
   return <div className={`${styles.sectionCard} ${className}`}>{children}</div>;
+}
+
+function DonutChart({ genres, selected, onSelect }) {
+  const [hovered, setHovered] = useState(null);
+  const total = genres.reduce((s, g) => s + g.pct, 0);
+  const cx = 56, cy = 56, R = 44, r = 26;
+  let angle = -90;
+  const segs = genres.map(g => {
+    const sweep = (g.pct / total) * 360;
+    const seg = { ...g, start: angle, end: angle + sweep - 1.5 };
+    angle += sweep;
+    return seg;
+  });
+  function pt(deg, radius) {
+    const rad = deg * Math.PI / 180;
+    return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)];
+  }
+  function arcPath(start, end) {
+    const [x1, y1] = pt(start, R);
+    const [x2, y2] = pt(end, R);
+    const [x3, y3] = pt(end, r);
+    const [x4, y4] = pt(start, r);
+    const large = end - start > 180 ? 1 : 0;
+    return `M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${x4},${y4}Z`;
+  }
+  const hoveredGenre = genres.find(g => g.name === hovered);
+  return (
+    <div className={styles.donutWrap}>
+      <svg viewBox="0 0 112 112" className={styles.donutSvg}>
+        {segs.map(seg => {
+          const midAngle = (seg.start + seg.end) / 2;
+          const midR = (R + r) / 2;
+          const [tx, ty] = pt(midAngle, midR);
+          const sweep = seg.end - seg.start;
+          return (
+            <g key={seg.name}>
+              <path
+                d={arcPath(seg.start, seg.end)}
+                fill={seg.color}
+                opacity={!selected || selected === seg.name ? 1 : 0.65}
+                className={styles.donutSegment}
+                onClick={() => onSelect(selected === seg.name ? null : seg.name)}
+                onMouseEnter={() => setHovered(seg.name)}
+                onMouseLeave={() => setHovered(null)}
+              />
+              {sweep > 18 && (
+                <text
+                  x={tx} y={ty}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  className={styles.donutLabel}
+                  style={{ opacity: !selected || selected === seg.name ? 1 : 0.3 }}
+                  pointerEvents="none"
+                >
+                  {seg.pct}%
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <div className={styles.donutTooltip} style={{ visibility: hoveredGenre ? 'visible' : 'hidden' }}>
+        {hoveredGenre && (
+          <>
+            <span className={styles.donutTooltipDot} style={{ background: hoveredGenre.color }} />
+            <span className={styles.donutTooltipName}>{hoveredGenre.name}</span>
+            <span className={styles.donutTooltipPct}>{hoveredGenre.pct}%</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ── Sections ── */
@@ -211,8 +292,11 @@ function Estanteria({ onNavigate }) {
     setPage(0);
   }
 
-  function handleNextPage() {
-    setPage(p => (p + 1) % totalPages);
+  const isLastPage = page === totalPages - 1;
+  const padded = [...visible, ...Array(Math.max(0, PAGE_SIZE - visible.length)).fill(null)];
+
+  function handlePageBtn() {
+    setPage(p => isLastPage ? 0 : p + 1);
   }
 
   return (
@@ -235,23 +319,21 @@ function Estanteria({ onNavigate }) {
       </div>
       <SectionCard className={styles.shelfCard}>
         <div className={styles.shelfGrid}>
-          {visible.length > 0 ? (
-            visible.map(book => (
-              <div key={book.id} className={styles.shelfBook} onClick={() => onNavigate?.('libro')} style={{ cursor: 'pointer' }}>
-                <img className={styles.shelfCover} src={book.cover} alt={book.title} />
-                <p className={styles.shelfTitle}>{book.title}</p>
-                <p className={styles.shelfAuthor}>{book.author}</p>
-              </div>
-            ))
+          {padded.map((book, idx) => book ? (
+            <div key={book.id} className={styles.shelfBook} onClick={() => onNavigate?.('libro')} style={{ cursor: 'pointer' }}>
+              <img className={styles.shelfCover} src={book.cover} alt={book.title} />
+              <p className={styles.shelfTitle}>{book.title}</p>
+              <p className={styles.shelfAuthor}>{book.author}</p>
+            </div>
           ) : (
-            <p className={styles.shelfEmpty}>No hay libros en esta categoría aún.</p>
-          )}
+            <div key={`ph-${idx}`} className={styles.shelfBookPlaceholder} />
+          ))}
         </div>
         {totalPages > 1 && (
           <button
-            className={styles.chevronBtn}
-            onClick={handleNextPage}
-            title={`Página ${page + 1} de ${totalPages}`}
+            className={`${styles.chevronBtn} ${isLastPage ? styles.chevronBtnLeft : ''}`}
+            onClick={handlePageBtn}
+            title={isLastPage ? 'Volver al inicio' : `Página ${page + 1} de ${totalPages}`}
           >
             <ChevronRightIcon />
           </button>
@@ -295,6 +377,12 @@ function Listas() {
 
 function Progresos() {
   const maxPages = Math.max(...weekActivity.map(d => d.pages));
+  const totalPages = weekActivity.reduce((sum, d) => sum + d.pages, 0);
+  const todayIdx = weekActivity.findIndex(d => d.today);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+  const [selectedGenre, setSelectedGenre] = useState(null);
+
+  const displayDay = hoveredIdx !== null ? weekActivity[hoveredIdx] : weekActivity[todayIdx];
 
   return (
     <section className={styles.section}>
@@ -317,24 +405,32 @@ function Progresos() {
         <SectionCard className={styles.progresosCard}>
           <p className={styles.progresosColTitle}>Actividad semanal</p>
           <div className={styles.barChart}>
-            {weekActivity.map(({ day, pages, today }) => (
-              <div key={day} className={styles.barCol}>
+            {weekActivity.map(({ day, pages, today }, i) => {
+              const isHovered = hoveredIdx === i;
+              return (
                 <div
-                  className={`${styles.bar} ${today ? styles.barToday : ''}`}
-                  style={{ height: `${(pages / maxPages) * 64}px` }}
-                />
-                <span className={`${styles.barLabel} ${today ? styles.barLabelToday : ''}`}>{day}</span>
-              </div>
-            ))}
+                  key={day}
+                  className={styles.barCol}
+                  onMouseEnter={() => setHoveredIdx(i)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                >
+                  <div
+                    className={`${styles.bar} ${isHovered ? styles.barActive : today ? styles.barToday : ''}`}
+                    style={{ height: `${(pages / maxPages) * 64}px` }}
+                  />
+                  <span className={`${styles.barLabel} ${isHovered ? styles.barLabelActive : today ? styles.barLabelToday : ''}`}>{day}</span>
+                </div>
+              );
+            })}
           </div>
           <div className={styles.chartStats}>
             <div className={styles.chartStat}>
-              <span className={styles.chartStatNum}>236</span>
+              <span className={styles.chartStatNum}>{totalPages}</span>
               <span className={styles.chartStatLabel}>págs. semana</span>
             </div>
             <div className={styles.chartStat}>
-              <span className={styles.chartStatNum}>34</span>
-              <span className={styles.chartStatLabel}>págs. hoy</span>
+              <span className={styles.chartStatNum}>{displayDay.pages}</span>
+              <span className={styles.chartStatLabel}>págs. {displayDay.day.toLowerCase()}</span>
             </div>
             <div className={styles.chartStat}>
               <span className={`${styles.chartStatNum} ${styles.chartStatGreen}`}>↑12%</span>
@@ -344,20 +440,42 @@ function Progresos() {
         </SectionCard>
 
         {/* Géneros favoritos */}
-        <SectionCard className={styles.progresosCard}>
+        <SectionCard className={`${styles.progresosCard} ${styles.progresosCardGenre}`}>
           <p className={styles.progresosColTitle}>Géneros favoritos</p>
-          <div className={styles.genreList}>
-            {genres.map(({ name, pct, color }) => (
-              <div key={name} className={styles.genreItem}>
-                <div className={styles.genreRow}>
-                  <span className={styles.genreName}>{name}</span>
-                  <span className={styles.genrePct}>{pct}%</span>
-                </div>
-                <div className={styles.genreTrack}>
-                  <div className={styles.genreFill} style={{ width: `${pct}%`, background: color }} />
-                </div>
+          <div className={styles.genreChartLayout}>
+            <div className={styles.genreLegendSide}>
+              <div className={styles.donutLegend}>
+                {genres.map(g => (
+                  <div
+                    key={g.name}
+                    className={`${styles.donutLegendItem} ${selectedGenre === g.name ? styles.donutLegendItemActive : ''}`}
+                    onClick={() => setSelectedGenre(selectedGenre === g.name ? null : g.name)}
+                  >
+                    <span className={styles.donutLegendDot} style={{ background: g.color }} />
+                    <span className={styles.donutLegendName}>{g.name}</span>
+                    <span className={styles.donutLegendPct}>{g.pct}%</span>
+                  </div>
+                ))}
               </div>
-            ))}
+              {selectedGenre && (
+                <div className={styles.genreBooksPanel}>
+                  {(genreBookIds[selectedGenre] || []).slice(0, 6).map(id => {
+                    const book = bookById[id];
+                    if (!book) return null;
+                    return (
+                      <div key={book.id} className={styles.genreBookItem}>
+                        <img className={styles.genreBookCover} src={book.cover} alt={book.title} />
+                        <div className={styles.genreBookInfo}>
+                          <p className={styles.genreBookTitle}>{book.title}</p>
+                          <p className={styles.genreBookAuthor}>{book.author}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            <DonutChart genres={genres} selected={selectedGenre} onSelect={setSelectedGenre} />
           </div>
         </SectionCard>
 

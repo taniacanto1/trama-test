@@ -199,9 +199,6 @@ export default function DetalleLibro({ onNavigate }) {
         <div className={styles.infoCard}>
           <div className={styles.coverWrap}>
             <img className={styles.cover} src={book.cover} alt={book.title} />
-            <div className={styles.coverOverlay}>
-              <span className={styles.coverOverlayText}>Ver libro</span>
-            </div>
           </div>
           <button className={styles.shareBtn} aria-label="Compartir">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
