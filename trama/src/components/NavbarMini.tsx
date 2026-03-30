@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 import styles from './NavbarMini.module.css';
 
 const BookIcon = () => (
@@ -18,48 +18,41 @@ const PeopleIcon = () => (
   </svg>
 );
 
-const ITEMS = [
+interface NavItem {
+  label: string;
+  page: string;
+  icon: ReactNode;
+}
+
+const ITEMS: NavItem[] = [
   { label: 'Biblioteca', page: 'biblioteca', icon: <BookIcon /> },
   { label: 'Explorar',   page: 'explorar',   icon: <SearchIcon /> },
   { label: 'Comunidad',  page: 'comunidad',  icon: <PeopleIcon /> },
 ];
 
-const STYLES = ['glass', 'warm', 'dark'];
-const STYLE_LABELS = ['A · Glass blur', 'B · Naranja', 'C · Oscuro'];
+const activePage = (current: string) => current === 'libro' ? 'explorar' : current;
 
-const activePage = (current) => current === 'libro' ? 'explorar' : current;
+interface NavbarMiniProps {
+  visible: boolean;
+  currentPage: string;
+  onNavigate: (page: string) => void;
+}
 
-export default function NavbarMini({ visible, currentPage, onNavigate }) {
-  const [pillStyle, setPillStyle] = useState('glass');
+export default function NavbarMini({ visible, currentPage, onNavigate }: NavbarMiniProps) {
   const active = activePage(currentPage);
 
   return (
-    <>
-      <div className={styles.optionBar}>
-        <label>Pill style</label>
-        {STYLES.map((s, i) => (
-          <button
-            key={s}
-            className={pillStyle === s ? styles.active : ''}
-            onClick={() => setPillStyle(s)}
-          >
-            {STYLE_LABELS[i]}
-          </button>
-        ))}
-      </div>
-
-      <nav className={`${styles.navbar} ${styles[pillStyle]} ${visible ? styles.visible : ''}`}>
-        {ITEMS.map(({ label, page, icon }) => (
-          <button
-            key={page}
-            className={`${styles.item} ${active === page ? styles.itemActive : ''}`}
-            onClick={() => onNavigate(page)}
-          >
-            {icon}
-            <span className={styles.label}>{label}</span>
-          </button>
-        ))}
-      </nav>
-    </>
+    <nav className={`${styles.navbar} ${styles.glass} ${visible ? styles.visible : ''}`}>
+      {ITEMS.map(({ label, page, icon }) => (
+        <button
+          key={page}
+          className={`${styles.item} ${active === page ? styles.itemActive : ''}`}
+          onClick={() => onNavigate(page)}
+        >
+          {icon}
+          <span className={styles.label}>{label}</span>
+        </button>
+      ))}
+    </nav>
   );
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import styles from './NavbarFull.module.css';
 
 const BookIcon = () => (
@@ -28,15 +29,27 @@ const BellIcon = () => (
   </svg>
 );
 
-const NAV_LINKS = [
+interface NavLink {
+  label: string;
+  page: string;
+  icon: ReactNode;
+}
+
+const NAV_LINKS: NavLink[] = [
   { label: 'Mi Biblioteca', page: 'biblioteca', icon: <BookIcon /> },
   { label: 'Explorar',      page: 'explorar',   icon: <SearchIcon /> },
   { label: 'Comunidad',     page: 'comunidad',  icon: <PeopleIcon /> },
 ];
 
-const activePage = (current) => current === 'libro' ? 'explorar' : current;
+const activePage = (current: string) => current === 'libro' ? 'explorar' : current;
 
-export default function NavbarFull({ hidden, currentPage, onNavigate }) {
+interface NavbarFullProps {
+  hidden: boolean;
+  currentPage: string;
+  onNavigate: (page: string) => void;
+}
+
+export default function NavbarFull({ hidden, currentPage, onNavigate }: NavbarFullProps) {
   const active = activePage(currentPage);
   return (
     <nav className={`${styles.navbar} ${hidden ? styles.hidden : ''}`}>

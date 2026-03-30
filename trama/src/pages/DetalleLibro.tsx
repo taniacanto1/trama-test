@@ -1,9 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import styles from './DetalleLibro.module.css';
 import BookCard from '../components/BookCard';
+import SynopsisModal from '../components/SynopsisModal';
+import { useClickOutside } from '../hooks/useClickOutside';
+import type { Book } from '../data/books';
 
 /* ── Helpers ── */
-function formatCount(n) {
+function formatCount(n: number): string {
   if (n >= 1000) {
     const k = n / 1000;
     return (Number.isInteger(k) ? k : k.toFixed(1)) + 'K';
@@ -27,7 +30,18 @@ const book = {
   synopsis: `En una posada en tierra de nadie, un hombre se dispone a relatar, por primera vez, la auténtica historia de su vida. Una historia que únicamente él conoce y que ha quedado diluida tras los rumores, las conjeturas y los cuentos de taberna que le han convertido en un personaje legendario a quien todos daban ya por muerto: Kvothe, músico, mendigo, ladrón, estudiante, mago, héroe y asesino.\n\nAhora va a revelar la verdad sobre sí mismo. Y para ello debe empezar por el principio: su infancia en una troupe de artistas itinerantes, los años malviviendo como un ladronzuelo en las calles de Tarbean y su etapa como estudiante en la Universidad.`,
 };
 
-const reviews = [
+interface ReviewData {
+  id: number;
+  name: string;
+  handle: string;
+  date: string;
+  rating: number;
+  text: string;
+  likes: number;
+  comments: number;
+}
+
+const reviews: ReviewData[] = [
   {
     id: 1,
     name: 'Andrea Ruiz',
@@ -60,13 +74,22 @@ const reviews = [
   },
 ];
 
-const authorBooks = [
+interface AuthorBook {
+  id: number;
+  cover: string;
+  title: string;
+  year: string;
+}
+
+const authorBooks: AuthorBook[] = [
   { id: 1, cover: `${OL}/9780756407124-L.jpg`, title: 'El Temor de un Hombre Sabio', year: '2011' },
   { id: 2, cover: `${OL}/9780756411374-L.jpg`, title: 'El Estrecho Sendero Entre Deseos', year: '2023' },
   { id: 3, cover: `${OL}/9780756405892-L.jpg`, title: 'La Música del Silencio', year: '1999' },
 ];
 
-const recommendations = [
+type BookRec = Omit<Book, 'rank' | 'isbn' | 'synopsis'>;
+
+const recommendations: BookRec[] = [
   { id: 1, cover: `${OL}/9780547928227-L.jpg`,  tag: 'Fantasía',  title: 'El hobbit',                         author: 'J.R.R. Tolkien',   rating: 4.6, reviews: '3.1k' },
   { id: 2, cover: `${OL}/9780439708180-L.jpg`,  tag: 'Fantasía',  title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling',     rating: 4.8, reviews: '15k' },
   { id: 3, cover: `${OL}/9780451524935-L.jpg`,  tag: 'Distopía',  title: '1984',                              author: 'George Orwell',    rating: 4.7, reviews: '8.2k' },
@@ -74,7 +97,12 @@ const recommendations = [
 
 /* ── Sub-components ── */
 
-function StarRating({ rating, size = 16 }) {
+interface StarRatingProps {
+  rating: number;
+  size?: number;
+}
+
+function StarRating({ rating, size = 16 }: StarRatingProps) {
   return (
     <div className={styles.stars}>
       {[1, 2, 3, 4, 5].map(i => {
@@ -110,7 +138,7 @@ function StarRating({ rating, size = 16 }) {
   );
 }
 
-function ReviewCard({ name, handle, date, rating, text, likes, comments }) {
+function ReviewCard({ name, handle, date, rating, text, likes, comments }: ReviewData) {
   return (
     <div className={styles.reviewCard}>
       <div className={styles.reviewHeader}>
@@ -146,48 +174,19 @@ function ReviewCard({ name, handle, date, rating, text, likes, comments }) {
 }
 
 /* ── Page ── */
-function SynopsisModal({ text, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [onClose]);
-
-  return (
-    <div className={styles.modalBackdrop} onClick={onClose}>
-      <div className={styles.modalBox} onClick={e => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>Sinopsis</h3>
-          <button className={styles.modalClose} onClick={onClose} aria-label="Cerrar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-        <div className={styles.modalBody}>
-          {text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
 
-export default function DetalleLibro({ onNavigate }) {
-  const [shelfOpen, setShelfOpen] = useState(false);
-  const [savedShelf, setSavedShelf] = useState(null);
-  const [synopsisOpen, setSynopsisOpen] = useState(false);
-  const shelfRef = useRef(null);
+interface DetalleLibroProps {
+  onNavigate?: (page: string) => void;
+}
 
-  useEffect(() => {
-    if (!shelfOpen) return;
-    const handler = (e) => { if (shelfRef.current && !shelfRef.current.contains(e.target)) setShelfOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [shelfOpen]);
+export default function DetalleLibro({ onNavigate }: DetalleLibroProps) {
+  const [shelfOpen, setShelfOpen] = useState(false);
+  const [savedShelf, setSavedShelf] = useState<string | null>(null);
+  const [synopsisOpen, setSynopsisOpen] = useState(false);
+  const shelfRef = useRef<HTMLDivElement>(null);
+
+  useClickOutside(shelfRef, shelfOpen, () => setShelfOpen(false));
 
   return (
     <main className={styles.page}>
@@ -318,8 +317,9 @@ export default function DetalleLibro({ onNavigate }) {
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Patrick-rothfuss-2014-kyle-cassidy.jpg/500px-Patrick-rothfuss-2014-kyle-cassidy.jpg"
               alt="Patrick Rothfuss"
               onError={e => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'flex';
+                e.currentTarget.style.display = 'none';
+                const sibling = e.currentTarget.nextSibling as HTMLElement | null;
+                if (sibling) sibling.style.display = 'flex';
               }}
             />
             <div className={styles.authorPhotoFallback}>PR</div>

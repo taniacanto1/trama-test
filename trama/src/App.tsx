@@ -4,6 +4,7 @@ import NavbarMini from './components/NavbarMini';
 import Explorar from './pages/Explorar';
 import MiBiblioteca from './pages/MiBiblioteca';
 import DetalleLibro from './pages/DetalleLibro';
+import EstanteriaCompleta from './pages/EstanteriaCompleta';
 
 const SCROLL_THRESHOLD = 100;
 
@@ -17,8 +18,7 @@ export default function App() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Scroll to top on page change
-  const navigate = (page) => {
+  const navigate = (page: string) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -27,9 +27,10 @@ export default function App() {
     <>
       <NavbarFull hidden={scrolled} currentPage={currentPage} onNavigate={navigate} />
       <NavbarMini visible={scrolled} currentPage={currentPage} onNavigate={navigate} />
-      {currentPage === 'explorar'   && <Explorar onNavigate={navigate} />}
-      {currentPage === 'biblioteca' && <MiBiblioteca onNavigate={navigate} />}
-      {currentPage === 'libro'      && <DetalleLibro onNavigate={navigate} />}
+      {currentPage === 'explorar'    && <Explorar onNavigate={navigate} />}
+      {currentPage === 'biblioteca'  && <MiBiblioteca onNavigate={navigate} />}
+      {currentPage === 'estanteria'  && <EstanteriaCompleta onNavigate={navigate} />}
+      {currentPage === 'libro'       && <DetalleLibro onNavigate={navigate} />}
     </>
   );
 }

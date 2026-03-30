@@ -10,17 +10,30 @@ function XIcon() {
   );
 }
 
-export default function ProgressModal({ book, onClose }) {
+interface ProgressBook {
+  cover: string;
+  title: string;
+  author: string;
+  currentPage: number;
+  totalPages: number;
+}
+
+interface ProgressModalProps {
+  book: ProgressBook;
+  onClose: () => void;
+}
+
+export default function ProgressModal({ book, onClose }: ProgressModalProps) {
   const [finished, setFinished] = useState(false);
   const [currentPage, setCurrentPage] = useState(book.currentPage);
   const [note, setNote] = useState('');
-  const panelRef = useRef(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  function handleBackdropClick(e) {
-    if (!panelRef.current?.contains(e.target)) onClose();
+  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (!panelRef.current?.contains(e.target as Node)) onClose();
   }
 
-  function handlePageChange(e) {
+  function handlePageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = Math.max(0, Math.min(Number(e.target.value), book.totalPages));
     setCurrentPage(val);
   }

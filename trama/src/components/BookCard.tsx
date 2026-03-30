@@ -3,19 +3,32 @@ import styles from './BookCard.module.css';
 
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
 
-export default function BookCard({ cover, tag, title, author, rating, reviews, rank, onNavigate }) {
+interface BookCardProps {
+  cover: string;
+  tag: string;
+  title: string;
+  author: string;
+  rating: number;
+  reviews: string;
+  rank?: number;
+  onNavigate?: () => void;
+}
+
+export default function BookCard({ cover, tag, title, author, rating, reviews, rank, onNavigate }: BookCardProps) {
   const [open, setOpen] = useState(false);
-  const [saved, setSaved] = useState(null);
-  const ref = useRef(null);
+  const [saved, setSaved] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
-  const handleSelect = (option) => {
+  const handleSelect = (option: string) => {
     setSaved(saved === option ? null : option);
     setOpen(false);
   };
