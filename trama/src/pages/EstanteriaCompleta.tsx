@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { shelfBooks, SHELF_FILTERS } from '../data/shelfBooks';
+import { useBookSection } from '../hooks/useOpenLibrary';
+import type { Book } from '../data/books';
 import NoResults from '../components/NoResults';
 import { searchMatch } from '../utils/search';
 import styles from './EstanteriaCompleta.module.css';
@@ -19,28 +20,61 @@ const FilterIcon = () => (
   </svg>
 );
 
+/* ── Shelf config (same queries as MiBiblioteca → shared cache) ── */
+const SHELF_CONFIG = [
+  { label: 'Quiero leer', query: 'historical fiction novel',          tag: 'Histórica', delay: 200 },
+  { label: 'Leyendo',     query: 'fantasy magic adventure',           tag: 'Fantasía',  delay: 0   },
+  { label: 'Acabado',     query: 'literary drama fiction classic',    tag: 'Drama',     delay: 100 },
+  { label: 'No acabado',  query: 'science fiction dystopian thriller', tag: 'Otros',    delay: 300 },
+] as const;
+
+type ShelfLabel = typeof SHELF_CONFIG[number]['label'];
+
+const SKELETON_COUNT = 14;
+
 /* ── Page ── */
 interface EstanteriaCompletaProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, book?: Book) => void;
 }
 
 export default function EstanteriaCompleta({ onNavigate }: EstanteriaCompletaProps) {
-  const [activeFilter, setActiveFilter] = useState(SHELF_FILTERS[0].label);
+  const [activeFilter, setActiveFilter] = useState<ShelfLabel>(SHELF_CONFIG[0].label);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const isSearching = searchQuery.trim().length > 0;
+  // Fetch all 4 shelf sections — identical args to MiBiblioteca, so cache is reused
+  const { books: booksQuiero,    loading: lQ } = useBookSection(SHELF_CONFIG[0].query, SHELF_CONFIG[0].tag, 14, SHELF_CONFIG[0].delay);
+  const { books: booksLeyendo,   loading: lL } = useBookSection(SHELF_CONFIG[1].query, SHELF_CONFIG[1].tag, 14, SHELF_CONFIG[1].delay);
+  const { books: booksAcabado,   loading: lA } = useBookSection(SHELF_CONFIG[2].query, SHELF_CONFIG[2].tag, 14, SHELF_CONFIG[2].delay);
+  const { books: booksNoAcabado, loading: lN } = useBookSection(SHELF_CONFIG[3].query, SHELF_CONFIG[3].tag, 14, SHELF_CONFIG[3].delay);
 
-  /* When searching: across all shelves. When browsing: filter by active tab. */
+  const shelfBooksMap: Record<ShelfLabel, Book[]> = {
+    'Quiero leer': booksQuiero,
+    'Leyendo':     booksLeyendo,
+    'Acabado':     booksAcabado,
+    'No acabado':  booksNoAcabado,
+  };
+
+  const loadingMap: Record<ShelfLabel, boolean> = {
+    'Quiero leer': lQ,
+    'Leyendo':     lL,
+    'Acabado':     lA,
+    'No acabado':  lN,
+  };
+
+  const isSearching = searchQuery.trim().length > 0;
+  const allBooks = [...booksQuiero, ...booksLeyendo, ...booksAcabado, ...booksNoAcabado];
+  const activeLoading = loadingMap[activeFilter];
+
   const displayBooks = isSearching
-    ? shelfBooks.filter(b =>
+    ? allBooks.filter(b =>
         searchMatch(searchQuery, b.title) ||
         searchMatch(searchQuery, b.author)
       )
-    : shelfBooks.filter(b => b.shelf === activeFilter);
+    : shelfBooksMap[activeFilter] ?? [];
 
   const hasResults = displayBooks.length > 0;
 
-  function handleFilterChange(label: string) {
+  function handleFilterChange(label: ShelfLabel) {
     setActiveFilter(label);
     setSearchQuery('');
   }
@@ -65,14 +99,14 @@ export default function EstanteriaCompleta({ onNavigate }: EstanteriaCompletaPro
 
         {/* Shelf filter tabs */}
         <div className={styles.filterTabs}>
-          {SHELF_FILTERS.map(({ label, count }) => (
+          {SHELF_CONFIG.map(({ label }) => (
             <button
               key={label}
               className={`${styles.filterTab} ${!isSearching && activeFilter === label ? styles.filterTabActive : ''}`}
               onClick={() => handleFilterChange(label)}
             >
               {label}
-              <span className={styles.filterCount}>{count}</span>
+              <span className={styles.filterCount}>{shelfBooksMap[label]?.length ?? 0}</span>
             </button>
           ))}
         </div>
@@ -118,13 +152,23 @@ export default function EstanteriaCompleta({ onNavigate }: EstanteriaCompletaPro
       {/* ── Content ── */}
       {isSearching && !hasResults ? (
         <NoResults onNavigate={onNavigate} />
+      ) : activeLoading && !isSearching ? (
+        <div className={styles.booksGrid}>
+          {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+            <div key={i} className={styles.bookItemSkeleton}>
+              <div className={styles.skeletonCover} />
+              <div className={styles.skeletonTitle} />
+              <div className={styles.skeletonAuthor} />
+            </div>
+          ))}
+        </div>
       ) : (
         <div className={styles.booksGrid}>
           {displayBooks.map(book => (
             <div
               key={book.id}
               className={styles.bookItem}
-              onClick={() => onNavigate?.('libro')}
+              onClick={() => onNavigate?.('libro', book)}
             >
               <img className={styles.bookCover} src={book.cover} alt={book.title} />
               <p className={styles.bookTitle}>{book.title}</p>

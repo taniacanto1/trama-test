@@ -3,10 +3,10 @@
   "configurations": [
     {
       "name": "trama",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js"],
       "port": 5173,
-      "cwd": "/Users/taniacanto/Desktop/test 1/trama"
+      "cwd": "/Users/taniacanto/Desktop/trama-test/trama"
     }
   ]
 }

@@ -264,6 +264,69 @@
   text-overflow: ellipsis;
 }
 
+/* ── Skeleton loading state ── */
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.skeletonBase {
+  background: linear-gradient(90deg,
+    var(--color-border-subtle) 25%,
+    var(--color-border-medium) 50%,
+    var(--color-border-subtle) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+.bookItemSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonCover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg,
+    var(--color-border-subtle) 25%,
+    var(--color-border-medium) 50%,
+    var(--color-border-subtle) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeletonTitle {
+  height: 14px;
+  width: 80%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg,
+    var(--color-border-subtle) 25%,
+    var(--color-border-medium) 50%,
+    var(--color-border-subtle) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.skeletonAuthor {
+  height: 12px;
+  width: 55%;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg,
+    var(--color-border-subtle) 25%,
+    var(--color-border-medium) 50%,
+    var(--color-border-subtle) 75%
+  );
+  background-size: 1200px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
 /* ══════════════════════════════════════
    NO RESULTS EMPTY STATE
 ══════════════════════════════════════ */

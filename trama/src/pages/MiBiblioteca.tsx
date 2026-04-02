@@ -1,19 +1,13 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import styles from './MiBiblioteca.module.css';
 import ProgressModal from './ProgressModal';
-import { shelfBooks, SHELF_FILTERS } from '../data/shelfBooks';
-import type { ShelfBook } from '../data/shelfBooks';
+import { useBookSection } from '../hooks/useOpenLibrary';
+import type { Book } from '../data/books';
 import type { NavigateProps } from '../types/common';
 
-/* ── Data ── */
-const currentBook = {
-  cover: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1270352123i/186074.jpg',
-  title: 'El nombre del viento',
-  author: 'Patrick Rothfuss',
-  streak: 12,
-  currentPage: 233,
-  totalPages: 550,
-};
+/* ── Static non-book data ── */
+
+const READING_PROGRESS = { streak: 12, currentPage: 233, totalPages: 550 };
 
 const lists = [
   { id: 1, name: 'Muyyy recomendados', count: 12 },
@@ -21,11 +15,7 @@ const lists = [
   { id: 3, name: 'Escritos por mujeres', count: 9 },
 ];
 
-interface Genre {
-  name: string;
-  pct: number;
-  color: string;
-}
+interface Genre { name: string; pct: number; color: string; }
 
 const genres: Genre[] = [
   { name: 'Fantasía',  pct: 42, color: '#8B5CF6' },
@@ -34,20 +24,7 @@ const genres: Genre[] = [
   { name: 'Otros',     pct: 12, color: '#10B981' },
 ];
 
-const genreBookIds: Record<string, number[]> = {
-  'Fantasía':  [7, 8, 9],
-  'Drama':     [10, 11, 35, 38, 40],
-  'Histórica': [37, 39],
-  'Otros':     [12, 33, 34, 36],
-};
-
-const bookById = Object.fromEntries(shelfBooks.map(b => [b.id, b])) as Record<number, ShelfBook>;
-
-interface WeekDay {
-  day: string;
-  pages: number;
-  today?: boolean;
-}
+interface WeekDay { day: string; pages: number; today?: boolean; }
 
 const weekActivity: WeekDay[] = [
   { day: 'LU', pages: 22 },
@@ -59,6 +36,9 @@ const weekActivity: WeekDay[] = [
   { day: 'DO', pages: 18, today: true },
 ];
 
+/* ── Shelf labels ── */
+const SHELF_LABELS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'] as const;
+type ShelfLabel = typeof SHELF_LABELS[number];
 
 /* ── Sub-components ── */
 
@@ -87,7 +67,7 @@ function PlusIcon() {
 }
 
 interface SectionCardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
@@ -101,10 +81,7 @@ interface DonutChartProps {
   onSelect: (name: string | null) => void;
 }
 
-interface Seg extends Genre {
-  start: number;
-  end: number;
-}
+interface Seg extends Genre { start: number; end: number; }
 
 function DonutChart({ genres, selected, onSelect }: DonutChartProps) {
   const [hovered, setHovered] = useState<string | null>(null);
@@ -180,31 +157,53 @@ function DonutChart({ genres, selected, onSelect }: DonutChartProps) {
 
 /* ── Sections ── */
 
-function EstoyLeyendo({ onNavigate }: NavigateProps) {
+interface EstoyLeyendoProps extends NavigateProps {
+  book: Book | null;
+  loading: boolean;
+}
+
+function EstoyLeyendo({ book, loading, onNavigate }: EstoyLeyendoProps) {
   const [progressOpen, setProgressOpen] = useState(false);
-  const progress = Math.round((currentBook.currentPage / currentBook.totalPages) * 100);
+  const totalPages = book?.pages ?? READING_PROGRESS.totalPages;
+  const progress = Math.round((READING_PROGRESS.currentPage / totalPages) * 100);
+
+  const progressBook = {
+    cover: book?.cover ?? '',
+    title: book?.title ?? '',
+    author: book?.author ?? '',
+    currentPage: READING_PROGRESS.currentPage,
+    totalPages,
+  };
 
   return (
     <section className={`${styles.section} ${styles.readingSection}`}>
       <h2 className={styles.sectionTitle}>Estoy leyendo...</h2>
       <SectionCard className={styles.readingCard}>
-        <img
-          className={styles.bookCover}
-          src={currentBook.cover}
-          alt={currentBook.title}
-          onClick={() => onNavigate?.('libro')}
-          style={{ cursor: 'pointer' }}
-        />
+        {loading || !book ? (
+          <div className={styles.coverPlaceholder} />
+        ) : (
+          <img
+            className={styles.bookCover}
+            src={book.cover}
+            alt={book.title}
+            onClick={() => onNavigate?.('libro')}
+            style={{ cursor: 'pointer' }}
+          />
+        )}
 
         <div className={styles.bookInfo}>
           <div className={styles.bookHeader}>
             <div>
-              <h3 className={styles.bookTitle}>{currentBook.title}</h3>
-              <p className={styles.bookAuthor}>{currentBook.author}</p>
+              <h3 className={styles.bookTitle}>
+                {(loading || !book) ? <span className={styles.skeletonText} style={{ width: '160px' }} /> : book.title}
+              </h3>
+              <p className={styles.bookAuthor}>
+                {(loading || !book) ? <span className={styles.skeletonText} style={{ width: '100px' }} /> : book.author}
+              </p>
             </div>
             <div className={styles.streakBadge}>
               <FlameIcon />
-              <span>{currentBook.streak} días seguidos</span>
+              <span>{READING_PROGRESS.streak} días seguidos</span>
             </div>
           </div>
 
@@ -212,7 +211,7 @@ function EstoyLeyendo({ onNavigate }: NavigateProps) {
             <div className={styles.progressHeader}>
               <span className={styles.progressLabel}>Progreso</span>
               <span className={styles.progressPages}>
-                {currentBook.currentPage}/{currentBook.totalPages} págs.
+                {READING_PROGRESS.currentPage}/{totalPages} págs.
               </span>
             </div>
             <div className={styles.progressBarTrack}>
@@ -232,7 +231,7 @@ function EstoyLeyendo({ onNavigate }: NavigateProps) {
       </SectionCard>
 
       {progressOpen && (
-        <ProgressModal book={currentBook} onClose={() => setProgressOpen(false)} />
+        <ProgressModal book={progressBook} onClose={() => setProgressOpen(false)} />
       )}
     </section>
   );
@@ -242,26 +241,31 @@ const PAGE_SIZE = 7;
 
 interface EstanteriaProps extends NavigateProps {
   onVerTodo?: () => void;
+  shelfBooksMap: Record<ShelfLabel, Book[]>;
+  loadingMap: Record<ShelfLabel, boolean>;
 }
 
-function Estanteria({ onNavigate, onVerTodo }: EstanteriaProps) {
-  const [activeFilter, setActiveFilter] = useState(SHELF_FILTERS[0].label);
+function Estanteria({ onNavigate, onVerTodo, shelfBooksMap, loadingMap }: EstanteriaProps) {
+  const [activeFilter, setActiveFilter] = useState<ShelfLabel>(SHELF_LABELS[0]);
   const [page, setPage] = useState(0);
 
-  const filtered = shelfBooks.filter(b => b.shelf === activeFilter);
+  const filtered = shelfBooksMap[activeFilter as ShelfLabel] ?? [];
+  const loading = loadingMap[activeFilter as ShelfLabel] ?? false;
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const visible = filtered.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
-  function handleFilterChange(label: string) {
+  function handleFilterChange(label: ShelfLabel) {
     setActiveFilter(label);
     setPage(0);
   }
 
-  const isLastPage = page === totalPages - 1;
-  const padded = [...visible, ...Array(Math.max(0, PAGE_SIZE - visible.length)).fill(null)] as (ShelfBook | null)[];
+  const isLastPage = page >= totalPages - 1;
+  const padded = loading
+    ? Array(PAGE_SIZE).fill(null) as null[]
+    : [...visible, ...Array(Math.max(0, PAGE_SIZE - visible.length)).fill(null)] as (Book | null)[];
 
   function handlePageBtn() {
-    setPage(p => isLastPage ? 0 : p + 1);
+    setPage((p: number) => isLastPage ? 0 : p + 1);
   }
 
   return (
@@ -269,14 +273,14 @@ function Estanteria({ onNavigate, onVerTodo }: EstanteriaProps) {
       <h2 className={styles.sectionTitle}>Estantería</h2>
       <div className={styles.shelfSubHeader}>
         <div className={styles.filterTabs}>
-          {SHELF_FILTERS.map(({ label, count }) => (
+          {SHELF_LABELS.map(label => (
             <button
               key={label}
               className={`${styles.filterTab} ${activeFilter === label ? styles.filterTabActive : ''}`}
               onClick={() => handleFilterChange(label)}
             >
               {label}
-              <span className={styles.filterCount}>{count}</span>
+              <span className={styles.filterCount}>{shelfBooksMap[label]?.length ?? 0}</span>
             </button>
           ))}
         </div>
@@ -291,10 +295,10 @@ function Estanteria({ onNavigate, onVerTodo }: EstanteriaProps) {
               <p className={styles.shelfAuthor}>{book.author}</p>
             </div>
           ) : (
-            <div key={`ph-${idx}`} className={styles.shelfBookPlaceholder} />
+            <div key={`ph-${idx}`} className={`${styles.shelfBookPlaceholder} ${loading ? styles.shelfBookSkeleton : ''}`} />
           ))}
         </div>
-        {totalPages > 1 && (
+        {!loading && totalPages > 1 && (
           <button
             className={`${styles.chevronBtn} ${isLastPage ? styles.chevronBtnLeft : ''}`}
             onClick={handlePageBtn}
@@ -308,20 +312,29 @@ function Estanteria({ onNavigate, onVerTodo }: EstanteriaProps) {
   );
 }
 
-function Listas() {
+interface ListasProps {
+  collageBooks: Book[];
+}
+
+function Listas({ collageBooks }: ListasProps) {
+  const covers = collageBooks.slice(0, 4);
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2 className={styles.sectionTitle}>Listas</h2>
         <a href="#" className={styles.verTodo}>Ver todo <ChevronRightIcon /></a>
       </div>
-      <SectionCard className={styles.listasCard}>
+      <div className={styles.listasCard}>
         {lists.map(list => (
           <div key={list.id} className={styles.listaItem}>
             <div className={styles.listaCollage}>
               {[0, 1, 2, 3].map(i => (
                 <div key={i} className={styles.listaCollageImg}>
-                  <img src={shelfBooks[i].cover} alt="" />
+                  {covers[i] ? (
+                    <img src={covers[i].cover} alt="" />
+                  ) : (
+                    <div className={styles.listaCollagePlaceholder} />
+                  )}
                 </div>
               ))}
             </div>
@@ -335,14 +348,18 @@ function Listas() {
           <div className={styles.listaNuevaIcon}><PlusIcon /></div>
           <p className={styles.listaNuevaText}>Crear nueva lista</p>
         </div>
-      </SectionCard>
+      </div>
     </section>
   );
 }
 
-function Progresos() {
+interface ProgresosProps {
+  genreBooks: Record<string, Book[]>;
+}
+
+function Progresos({ genreBooks }: ProgresosProps) {
   const maxPages = Math.max(...weekActivity.map(d => d.pages));
-  const totalPages = weekActivity.reduce((sum, d) => sum + d.pages, 0);
+  const totalWeekPages = weekActivity.reduce((sum, d) => sum + d.pages, 0);
   const todayIdx = weekActivity.findIndex(d => d.today);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -390,7 +407,7 @@ function Progresos() {
           </div>
           <div className={styles.chartStats}>
             <div className={styles.chartStat}>
-              <span className={styles.chartStatNum}>{totalPages}</span>
+              <span className={styles.chartStatNum}>{totalWeekPages}</span>
               <span className={styles.chartStatLabel}>págs. semana</span>
             </div>
             <div className={styles.chartStat}>
@@ -424,19 +441,15 @@ function Progresos() {
               </div>
               {selectedGenre && (
                 <div className={styles.genreBooksPanel}>
-                  {(genreBookIds[selectedGenre] || []).slice(0, 6).map(id => {
-                    const book = bookById[id];
-                    if (!book) return null;
-                    return (
-                      <div key={book.id} className={styles.genreBookItem}>
-                        <img className={styles.genreBookCover} src={book.cover} alt={book.title} />
-                        <div className={styles.genreBookInfo}>
-                          <p className={styles.genreBookTitle}>{book.title}</p>
-                          <p className={styles.genreBookAuthor}>{book.author}</p>
-                        </div>
+                  {(genreBooks[selectedGenre] ?? []).slice(0, 6).map(book => (
+                    <div key={book.id} className={styles.genreBookItem}>
+                      <img className={styles.genreBookCover} src={book.cover} alt={book.title} />
+                      <div className={styles.genreBookInfo}>
+                        <p className={styles.genreBookTitle}>{book.title}</p>
+                        <p className={styles.genreBookAuthor}>{book.author}</p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -451,12 +464,49 @@ function Progresos() {
 
 /* ── Page ── */
 export default function MiBiblioteca({ onNavigate }: NavigateProps) {
+  // Fetch each shelf category from Open Library
+  // Each query maps to a genre name used in the Progresos chart
+  const { books: booksLeyendo,   loading: loadingL } = useBookSection('fantasy magic adventure',          'Fantasía',  14, 0);
+  const { books: booksAcabado,   loading: loadingA } = useBookSection('literary drama fiction classic',   'Drama',     14, 100);
+  const { books: booksQuiero,    loading: loadingQ } = useBookSection('historical fiction novel',         'Histórica', 14, 200);
+  const { books: booksNoAcabado, loading: loadingN } = useBookSection('science fiction dystopian thriller','Otros',    14, 300);
+
+  const shelfBooksMap: Record<ShelfLabel, Book[]> = {
+    'Leyendo':     booksLeyendo,
+    'Acabado':     booksAcabado,
+    'Quiero leer': booksQuiero,
+    'No acabado':  booksNoAcabado,
+  };
+
+  const loadingMap: Record<ShelfLabel, boolean> = {
+    'Leyendo':     loadingL,
+    'Acabado':     loadingA,
+    'Quiero leer': loadingQ,
+    'No acabado':  loadingN,
+  };
+
+  const genreBooks: Record<string, Book[]> = {
+    'Fantasía':  booksLeyendo,
+    'Drama':     booksAcabado,
+    'Histórica': booksQuiero,
+    'Otros':     booksNoAcabado,
+  };
+
+  // First book from the "Leyendo" section is the currently-reading book
+  const currentBook = booksLeyendo[0] ?? null;
+  const collageBooks = [...booksAcabado, ...booksLeyendo].slice(0, 4);
+
   return (
     <main className={styles.page}>
-      <EstoyLeyendo onNavigate={onNavigate} />
-      <Estanteria onNavigate={onNavigate} onVerTodo={() => onNavigate?.('estanteria')} />
-      <Listas />
-      <Progresos />
+      <EstoyLeyendo book={currentBook} loading={loadingL} onNavigate={onNavigate} />
+      <Estanteria
+        shelfBooksMap={shelfBooksMap}
+        loadingMap={loadingMap}
+        onNavigate={onNavigate}
+        onVerTodo={() => onNavigate?.('estanteria')}
+      />
+      <Listas collageBooks={collageBooks} />
+      <Progresos genreBooks={genreBooks} />
     </main>
   );
 }
