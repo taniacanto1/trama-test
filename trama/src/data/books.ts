@@ -9,6 +9,9 @@ export interface Book {
   rank?: number;
   isbn: string;
   synopsis: string;
+  olKey?: string;
+  year?: number;
+  pages?: number;
 }
 
 const BASE = 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books';

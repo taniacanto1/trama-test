@@ -1,29 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './DetalleLibro.module.css';
 import BookCard from '../components/BookCard';
 import SynopsisModal from '../components/SynopsisModal';
 import { useClickOutside } from '../hooks/useClickOutside';
+import { getWork, extractSynopsis } from '../lib/openLibrary';
 import type { Book } from '../data/books';
 
-/* ── Helpers ── */
-function formatCount(n: number): string {
-  if (n >= 1000) {
-    const k = n / 1000;
-    return (Number.isInteger(k) ? k : k.toFixed(1)) + 'K';
-  }
-  return n.toString();
-}
-
-/* ── Data ── */
+/* ── Default (fallback) book ── */
 const OL = 'https://covers.openlibrary.org/b/isbn';
 
-const book = {
+const DEFAULT_BOOK = {
   cover: `${OL}/0756404738-L.jpg`,
   genre: 'Fantasía',
   title: 'El nombre del viento',
   author: 'Patrick Rothfuss',
   rating: 4.7,
-  reviewCount: 10945,
+  reviews: '10.9k',
   pages: 662,
   year: 2007,
   isbn: '978-84-9800-296-2',
@@ -87,12 +79,10 @@ const authorBooks: AuthorBook[] = [
   { id: 3, cover: `${OL}/9780756405892-L.jpg`, title: 'La Música del Silencio', year: '1999' },
 ];
 
-type BookRec = Omit<Book, 'rank' | 'isbn' | 'synopsis'>;
-
-const recommendations: BookRec[] = [
-  { id: 1, cover: `${OL}/9780547928227-L.jpg`,  tag: 'Fantasía',  title: 'El hobbit',                         author: 'J.R.R. Tolkien',   rating: 4.6, reviews: '3.1k' },
-  { id: 2, cover: `${OL}/9780439708180-L.jpg`,  tag: 'Fantasía',  title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling',     rating: 4.8, reviews: '15k' },
-  { id: 3, cover: `${OL}/9780451524935-L.jpg`,  tag: 'Distopía',  title: '1984',                              author: 'George Orwell',    rating: 4.7, reviews: '8.2k' },
+const recommendations: Book[] = [
+  { id: 1, cover: `${OL}/9780547928227-L.jpg`,  tag: 'Fantasía',  title: 'El hobbit',                         author: 'J.R.R. Tolkien',   rating: 4.6, reviews: '3.1k', isbn: '978-84-450-7179-3', synopsis: '' },
+  { id: 2, cover: `${OL}/9780439708180-L.jpg`,  tag: 'Fantasía',  title: 'Harry Potter y la piedra filosofal', author: 'J.K. Rowling',     rating: 4.8, reviews: '15k',  isbn: '978-84-204-4879-8', synopsis: '' },
+  { id: 3, cover: `${OL}/9780451524935-L.jpg`,  tag: 'Distopía',  title: '1984',                              author: 'George Orwell',    rating: 4.7, reviews: '8.2k', isbn: '978-84-450-7185-4', synopsis: '' },
 ];
 
 /* ── Sub-components ── */
@@ -177,27 +167,60 @@ function ReviewCard({ name, handle, date, rating, text, likes, comments }: Revie
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
 
 interface DetalleLibroProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, book?: Book) => void;
+  book?: Book;
 }
 
-export default function DetalleLibro({ onNavigate }: DetalleLibroProps) {
+export default function DetalleLibro({ onNavigate, book: bookProp }: DetalleLibroProps) {
   const [shelfOpen, setShelfOpen] = useState(false);
   const [savedShelf, setSavedShelf] = useState<string | null>(null);
   const [synopsisOpen, setSynopsisOpen] = useState(false);
+  const [synopsis, setSynopsis] = useState(bookProp?.synopsis ?? DEFAULT_BOOK.synopsis);
   const shelfRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(shelfRef, shelfOpen, () => setShelfOpen(false));
 
+  /* Fetch synopsis from OL works API when navigating from OL search results */
+  useEffect(() => {
+    if (!bookProp?.olKey) return;
+    if (bookProp.synopsis) {
+      setSynopsis(bookProp.synopsis);
+      return;
+    }
+    setSynopsis('');
+    getWork(bookProp.olKey)
+      .then(work => {
+        const text = extractSynopsis(work);
+        setSynopsis(text);
+      })
+      .catch(() => {});
+  }, [bookProp?.olKey, bookProp?.synopsis]);
+
+  /* Compose display data from prop or fallback defaults */
+  const display = bookProp
+    ? {
+        cover:   bookProp.cover || DEFAULT_BOOK.cover,
+        genre:   bookProp.tag,
+        title:   bookProp.title,
+        author:  bookProp.author,
+        rating:  bookProp.rating || DEFAULT_BOOK.rating,
+        reviews: bookProp.reviews || '',
+        pages:   bookProp.pages ?? 0,
+        year:    bookProp.year ?? 0,
+        isbn:    bookProp.isbn,
+      }
+    : DEFAULT_BOOK;
+
   return (
     <main className={styles.page}>
 
-      {synopsisOpen && <SynopsisModal text={book.synopsis} onClose={() => setSynopsisOpen(false)} />}
+      {synopsisOpen && <SynopsisModal text={synopsis || DEFAULT_BOOK.synopsis} onClose={() => setSynopsisOpen(false)} />}
 
       {/* ══ Sección info libro ══ */}
       <section className={styles.infoSection}>
         <div className={styles.infoCard}>
           <div className={styles.coverWrap}>
-            <img className={styles.cover} src={book.cover} alt={book.title} />
+            <img className={styles.cover} src={display.cover} alt={display.title} />
           </div>
           <button className={styles.shareBtn} aria-label="Compartir">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -207,48 +230,64 @@ export default function DetalleLibro({ onNavigate }: DetalleLibroProps) {
             </svg>
           </button>
           <div className={styles.details}>
-            <span className={styles.genre}>{book.genre}</span>
-            <h1 className={styles.title}>{book.title}</h1>
-            <p className={styles.authorText}>{book.author}</p>
+            <span className={styles.genre}>{display.genre}</span>
+            <h1 className={styles.title}>{display.title}</h1>
+            <p className={styles.authorText}>{display.author}</p>
 
             <div className={styles.infoRow}>
-              <div className={styles.ratingBlock}>
-                <span className={styles.ratingNumber}>{book.rating}</span>
-                <div className={styles.ratingStarsGroup}>
-                  <StarRating rating={book.rating} size={15} />
-                  <span className={styles.ratingCount}>{formatCount(book.reviewCount)} valoraciones</span>
+              {display.rating > 0 && (
+                <>
+                  <div className={styles.ratingBlock}>
+                    <span className={styles.ratingNumber}>{display.rating}</span>
+                    <div className={styles.ratingStarsGroup}>
+                      <StarRating rating={display.rating} size={15} />
+                      {display.reviews && (
+                        <span className={styles.ratingCount}>{display.reviews} valoraciones</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.metaDivider} />
+                </>
+              )}
+              <>
+                <div className={styles.metaItem}>
+                  <span className={styles.metaLabel}>Páginas</span>
+                  <span className={styles.metaValue}>{display.pages > 0 ? display.pages : '—'}</span>
                 </div>
-              </div>
-              <div className={styles.metaDivider} />
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Páginas</span>
-                <span className={styles.metaValue}>{book.pages}</span>
-              </div>
-              <div className={styles.metaDivider} />
-              <div className={styles.metaItem}>
-                <span className={styles.metaLabel}>Publicación</span>
-                <span className={styles.metaValue}>{book.year}</span>
-              </div>
-              <div className={styles.metaDivider} />
+                <div className={styles.metaDivider} />
+              </>
+              {display.year > 0 && (
+                <>
+                  <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>Publicación</span>
+                    <span className={styles.metaValue}>{display.year}</span>
+                  </div>
+                  <div className={styles.metaDivider} />
+                </>
+              )}
               <div className={styles.metaItem}>
                 <span className={styles.metaLabel}>ISBN</span>
-                <span className={styles.metaValue}>{book.isbn}</span>
+                <span className={styles.metaValue}>{display.isbn || '—'}</span>
               </div>
             </div>
 
-            <div className={styles.synopsisCard}>
-              <div className={styles.synopsisText}>
-                {book.synopsis.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+            {synopsis ? (
+              <div className={styles.synopsisCard}>
+                <div className={styles.synopsisText}>
+                  {synopsis.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+                </div>
+                <div className={styles.synopsisGradient}>
+                  <button className={styles.synopsisExpand} onClick={() => setSynopsisOpen(true)}>
+                    Leer más
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div className={styles.synopsisGradient}>
-                <button className={styles.synopsisExpand} onClick={() => setSynopsisOpen(true)}>
-                  Leer más
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+            ) : bookProp?.olKey ? (
+              <p className={styles.synopsisLoading}>Cargando sinopsis…</p>
+            ) : null}
 
             <div className={styles.cardFooter}>
               <div className={styles.saveWrapper} ref={shelfRef}>
@@ -351,10 +390,10 @@ export default function DetalleLibro({ onNavigate }: DetalleLibroProps) {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
           Recomendaciones basadas en{' '}
-          <span className={styles.titleHighlight}>El Nombre del Viento</span>
+          <span className={styles.titleHighlight}>{display.title}</span>
         </h2>
         <div className={styles.recsGrid}>
-          {recommendations.map(b => <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />)}
+          {recommendations.map(b => <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />)}
         </div>
       </section>
 

@@ -2,16 +2,9 @@ import { useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 import BookCard from '../components/BookCard';
 import NoResults from '../components/NoResults';
-import { fuzzyMatch } from '../utils/search';
 import { useClickOutside } from '../hooks/useClickOutside';
-import {
-  tendencias,
-  porqueHasLeido,
-  destacadosFantasia,
-  ultimosLanzamientos,
-  masHistorias,
-  mejorValorados,
-} from '../data/books';
+import { useBookSearch, useBookSection } from '../hooks/useOpenLibrary';
+import type { Book } from '../data/books';
 import styles from './Explorar.module.css';
 
 /* ── Icons ── */
@@ -26,16 +19,6 @@ const SearchIcon = () => (
     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
   </svg>
 );
-
-/* ── All books deduplicated for search ── */
-const allBooks = [
-  ...tendencias,
-  ...porqueHasLeido,
-  ...destacadosFantasia,
-  ...ultimosLanzamientos,
-  ...masHistorias,
-  ...mejorValorados,
-].reduce((acc, b) => (acc.find(x => x.isbn === b.isbn) ? acc : [...acc, b]), [] as typeof tendencias);
 
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
 
@@ -73,10 +56,12 @@ function SearchResultCard({ cover, tag, title, author, rating, reviews, synopsis
           <span className={styles.resultTag}>{tag}</span>
           <p className={styles.resultTitle}>{title}</p>
           <p className={styles.resultAuthor}>{author}</p>
-          <p className={styles.resultRating}>
-            <span className={styles.resultStar}>★</span>{' '}{rating}{' '}
-            <span className={styles.resultCount}>({reviews})</span>
-          </p>
+          {rating > 0 && (
+            <p className={styles.resultRating}>
+              <span className={styles.resultStar}>★</span>{' '}{rating}{' '}
+              <span className={styles.resultCount}>({reviews})</span>
+            </p>
+          )}
           <div className={styles.resultActions}>
             <button className={styles.btnVer} onClick={onNavigate}>Ver libro</button>
             <div className={styles.saveWrapper} ref={ref}>
@@ -158,10 +143,12 @@ function SearchResultCard({ cover, tag, title, author, rating, reviews, synopsis
 interface SectionProps {
   title: ReactNode;
   linkText?: string;
+  single?: boolean;   // true = 1-row layout (Tendencias)
   children: ReactNode;
 }
 
-function Section({ title, linkText = 'Ver más', children }: SectionProps) {
+function Section({ title, linkText = 'Ver más', single = false, children }: SectionProps) {
+  const gridClass = single ? styles.cardGridSingle : styles.cardGrid;
   return (
     <section className={styles.section}>
       <div className={styles.sectionHeader}>
@@ -170,27 +157,39 @@ function Section({ title, linkText = 'Ver más', children }: SectionProps) {
           {linkText} <ChevronRight />
         </a>
       </div>
-      <div className={styles.cardGrid}>{children}</div>
+      <div className={gridClass}>{children}</div>
     </section>
+  );
+}
+
+function SectionSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <>
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className={styles.cardSkeleton} />
+      ))}
+    </>
   );
 }
 
 /* ── Page ── */
 interface ExplorarProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, book?: Book) => void;
 }
 
 export default function Explorar({ onNavigate }: ExplorarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { results, loading: searchLoading } = useBookSearch(searchQuery);
   const isSearching = searchQuery.trim().length > 0;
 
-  const results = isSearching
-    ? allBooks.filter(b =>
-        fuzzyMatch(searchQuery, b.title) ||
-        fuzzyMatch(searchQuery, b.author)
-      )
-    : [];
+  /* Curated sections — staggered 250 ms apart to avoid OL rate limiting */
+  const tendencias      = useBookSection('popular fiction bestsellers',    'Narrativa', 3,   0);
+  const porqueHasLeido  = useBookSection('contemporary literary fiction',   'Narrativa', 6, 100);
+  const destacados      = useBookSection('epic fantasy magic',              'Fantasía',  6, 200);
+  const lanzamientos    = useBookSection('fiction 2023 2024',               'Narrativa', 6, 300);
+  const masHistorias    = useBookSection('epic fantasy adventure series',   'Fantasía',  6, 400);
+  const mejorValorados  = useBookSection('literary fiction award winning',  'Narrativa', 6, 500);
 
   return (
     <main className={styles.page}>
@@ -225,62 +224,74 @@ export default function Explorar({ onNavigate }: ExplorarProps) {
         <div className={styles.resultsPanel}>
           <div className={styles.resultsPanelHeader}>
             <p className={styles.resultsCount}>
-              {results.length} resultado{results.length !== 1 ? 's' : ''} para &ldquo;{searchQuery}&rdquo;
+              {searchLoading
+                ? 'Buscando…'
+                : `${results.length} resultado${results.length !== 1 ? 's' : ''} para \u201c${searchQuery}\u201d`}
             </p>
             <span className={styles.hideSearchBtn} onClick={() => setSearchQuery('')}>
               Ocultar búsqueda
             </span>
           </div>
 
-          {results.length > 0 ? (
+          {!searchLoading && results.length > 0 && (
             <div className={styles.resultsList}>
               {results.map(b => (
                 <SearchResultCard
                   key={b.id}
-                  {...b}
-                  onNavigate={() => onNavigate?.('libro')}
+                  cover={b.cover}
+                  tag={b.tag}
+                  title={b.title}
+                  author={b.author}
+                  rating={b.rating}
+                  reviews={b.reviews}
+                  synopsis={b.synopsis}
+                  onNavigate={() => onNavigate?.('libro', b)}
                 />
               ))}
             </div>
-          ) : (
+          )}
+
+          {!searchLoading && results.length === 0 && (
             <NoResults onNavigate={onNavigate} />
           )}
         </div>
       ) : (
         <>
           <Section title="Tendencias esta semana">
-            {tendencias.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
-            ))}
+            {tendencias.loading
+              ? <SectionSkeleton count={3} />
+              : tendencias.books.map((b, i) => (
+                  <BookCard key={b.id} {...b} rank={i + 1} onNavigate={() => onNavigate?.('libro', b)} />
+                ))}
           </Section>
 
           <Section title={<>Porque has leído: <span className={styles.highlight}>Las Gratitudes</span></>}>
-            {porqueHasLeido.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+            {porqueHasLeido.loading ? <SectionSkeleton /> : porqueHasLeido.books.map(b => (
+              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}
           </Section>
 
           <Section title={<>Destacados de <span className={styles.highlight}>Fantasía</span></>}>
-            {destacadosFantasia.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+            {destacados.loading ? <SectionSkeleton /> : destacados.books.map(b => (
+              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}
           </Section>
 
           <Section title="Últimos lanzamientos">
-            {ultimosLanzamientos.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+            {lanzamientos.loading ? <SectionSkeleton /> : lanzamientos.books.map(b => (
+              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}
           </Section>
 
           <Section title={<>Más historias como <span className={styles.highlight}>El Nombre del Viento</span></>}>
-            {masHistorias.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+            {masHistorias.loading ? <SectionSkeleton /> : masHistorias.books.map(b => (
+              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}
           </Section>
 
           <Section title="Los mejor valorados de tu estilo">
-            {mejorValorados.map(b => (
-              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro')} />
+            {mejorValorados.loading ? <SectionSkeleton /> : mejorValorados.books.map(b => (
+              <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}
           </Section>
         </>

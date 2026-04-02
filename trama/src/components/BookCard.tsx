@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
+import { useClickOutside } from '../hooks/useClickOutside';
 import styles from './BookCard.module.css';
 
 const SHELF_OPTIONS = ['Quiero leer', 'Leyendo', 'Acabado', 'No acabado'];
@@ -17,35 +18,47 @@ interface BookCardProps {
 export default function BookCard({ cover, tag, title, author, rating, reviews, rank, onNavigate }: BookCardProps) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
+  const [coverFailed, setCoverFailed] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  useClickOutside(ref, open, () => setOpen(false));
 
   const handleSelect = (option: string) => {
     setSaved(saved === option ? null : option);
     setOpen(false);
   };
 
+  const showPlaceholder = !cover || coverFailed;
+
   return (
-    <div className={`${styles.card} ${rank ? styles.trending : ''} ${open ? styles.cardOpen : ''}`}>
+    <div className={`${styles.card} ${open ? styles.cardOpen : ''}`}>
       {rank && <div className={styles.rankClip}><span className={styles.rank}>{rank}</span></div>}
-      <img className={styles.cover} src={cover} alt={title} />
+      {showPlaceholder ? (
+        <div className={styles.coverPlaceholder} aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+      ) : (
+        <img
+          className={styles.cover}
+          src={cover}
+          alt={title}
+          onError={() => setCoverFailed(true)}
+        />
+      )}
       <div className={styles.info}>
         <div>
           <span className={styles.tag}>{tag}</span>
           <p className={styles.title}>{title}</p>
           <p className={styles.author}>{author}</p>
-          <p className={styles.rating}>
-            <span className={styles.star}>★</span> {rating}{' '}
-            <span className={styles.count}>({reviews})</span>
-          </p>
+          {rating > 0 && (
+            <p className={styles.rating}>
+              <span className={styles.star}>★</span> {rating}{' '}
+              <span className={styles.count}>({reviews})</span>
+            </p>
+          )}
         </div>
         <div className={styles.cardActions}>
           <button className={styles.btnVer} onClick={onNavigate}>Ver libro</button>

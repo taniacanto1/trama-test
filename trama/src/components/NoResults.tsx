@@ -23,7 +23,7 @@ const suggestionPool: Book[] = [
 const PAGE_SIZE = 3;
 
 interface NoResultsProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, book?: Book) => void;
 }
 
 export default function NoResults({ onNavigate }: NoResultsProps) {
@@ -45,7 +45,7 @@ export default function NoResults({ onNavigate }: NoResultsProps) {
         <h4 className={styles.suggestionsTitle}>Creemos que te gustará</h4>
         <div className={styles.suggestionsGrid}>
           {suggestions.map((b, i) => (
-            <BookCard key={`${b.id}-${page}-${i}`} {...b} onNavigate={() => onNavigate?.('libro')} />
+            <BookCard key={`${b.id}-${page}-${i}`} {...b} onNavigate={() => onNavigate?.('libro', b)} />
           ))}
         </div>
         <div className={styles.generateMoreWrap}>
