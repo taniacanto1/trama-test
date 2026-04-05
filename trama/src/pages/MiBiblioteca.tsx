@@ -186,7 +186,7 @@ function EstoyLeyendo({ book, loading, onNavigate }: EstoyLeyendoProps) {
             className={styles.bookCover}
             src={book.cover}
             alt={book.title}
-            onClick={() => onNavigate?.('libro')}
+            onClick={() => onNavigate?.('libro', book)}
             style={{ cursor: 'pointer' }}
           />
         )}
@@ -289,7 +289,7 @@ function Estanteria({ onNavigate, onVerTodo, shelfBooksMap, loadingMap }: Estant
       <SectionCard className={styles.shelfCard}>
         <div className={styles.shelfGrid}>
           {padded.map((book, idx) => book ? (
-            <div key={book.id} className={styles.shelfBook} onClick={() => onNavigate?.('libro')} style={{ cursor: 'pointer' }}>
+            <div key={book.id} className={styles.shelfBook} onClick={() => onNavigate?.('libro', book)} style={{ cursor: 'pointer' }}>
               <img className={styles.shelfCover} src={book.cover} alt={book.title} />
               <p className={styles.shelfTitle}>{book.title}</p>
               <p className={styles.shelfAuthor}>{book.author}</p>

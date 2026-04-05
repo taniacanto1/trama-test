@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { searchBooks, docCover, type OLSearchDoc } from '../lib/openLibrary';
+import {
+  searchBooks, docCover, coverById,
+  searchAuthor, getAuthorWorks, getWikipediaSummary,
+  type OLSearchDoc,
+} from '../lib/openLibrary';
 import type { Book } from '../data/books';
 
 const SUBJECT_MAP: Record<string, string> = {
@@ -61,7 +65,7 @@ export function useBookSearch(query: string, debounceMs = 400) {
   const [results, setResults] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     clearTimeout(timer.current);
@@ -94,7 +98,7 @@ export function useBookSearch(query: string, debounceMs = 400) {
 /* ── Persistent cache (localStorage) + in-memory cache ── */
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
-const STORAGE_PREFIX = 'trama_section_';
+const STORAGE_PREFIX = 'trama_section_v2_';
 
 interface StoredSection {
   books: Book[];
@@ -188,4 +192,75 @@ export function useBookSection(query: string, tag: string, limit = 6, delayMs = 
   }, []);
 
   return { books, loading };
+}
+
+/* ── Author data (Wikipedia bio/photo + OL works) ── */
+
+interface AuthorBookItem {
+  key: string;
+  cover: string;
+  title: string;
+  year: string;
+}
+
+export interface AuthorData {
+  photo: string;
+  bio: string;
+  books: AuthorBookItem[];
+}
+
+export function useAuthorData(authorName: string, currentBookTitle = '') {
+  /* Reset data synchronously when the author changes so stale data never shows */
+  const [prevName, setPrevName] = useState(authorName);
+  const [data, setData]       = useState<AuthorData | null>(null);
+  const [loading, setLoading] = useState(!!authorName);
+
+  if (prevName !== authorName) {
+    setPrevName(authorName);
+    setData(null);
+    setLoading(!!authorName);
+  }
+
+  useEffect(() => {
+    if (!authorName) { setLoading(false); return; }
+
+    let cancelled = false;
+    setLoading(true);
+
+    Promise.all([
+      getWikipediaSummary(authorName),
+      searchAuthor(authorName).then(author =>
+        author ? getAuthorWorks(author.key, 10) : []
+      ),
+    ])
+      .then(([wiki, works]) => {
+        if (cancelled) return;
+        const books = works
+          .filter(w => {
+            const validCover = w.covers?.find(id => id > 0);
+            return validCover !== undefined &&
+              w.title.toLowerCase() !== currentBookTitle.toLowerCase();
+          })
+          .slice(0, 4)
+          .map(w => ({
+            key: w.key,
+            cover: coverById(w.covers!.find(id => id > 0)!),
+            title: w.title,
+            year: w.first_publish_year ? String(w.first_publish_year) : '',
+          }));
+
+        setData({
+          photo: wiki?.thumbnail?.source ?? '',
+          bio:   wiki?.extract ?? '',
+          books,
+        });
+      })
+      .catch(() => { if (!cancelled) setData(null); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authorName]);
+
+  return { authorData: data, authorLoading: loading };
 }

@@ -670,7 +670,7 @@
   box-shadow: var(--shadow-book);
 }
 
-.authorBookTitle { font-size: var(--text-sm); font-weight: var(--weight-bold); color: var(--color-text-primary); line-height: 1.3; }
+.authorBookTitle { font-size: var(--text-sm); font-weight: var(--weight-bold); color: var(--color-text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .authorBookYear  { font-size: var(--text-sm); color: var(--color-text-tertiary); }
 
 /* ══════════════════════════════════════

@@ -283,7 +283,7 @@ export default function Explorar({ onNavigate }: ExplorarProps) {
             ))}
           </Section>
 
-          <Section title={<>Más historias como <span className={styles.highlight}>El Nombre del Viento</span></>}>
+          <Section title="Más aventuras épicas">
             {masHistorias.loading ? <SectionSkeleton /> : masHistorias.books.map(b => (
               <BookCard key={b.id} {...b} onNavigate={() => onNavigate?.('libro', b)} />
             ))}

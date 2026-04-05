@@ -4,22 +4,23 @@ import BookCard from '../components/BookCard';
 import SynopsisModal from '../components/SynopsisModal';
 import { useClickOutside } from '../hooks/useClickOutside';
 import { getWork, extractSynopsis } from '../lib/openLibrary';
+import { useAuthorData } from '../hooks/useOpenLibrary';
 import type { Book } from '../data/books';
 
 /* ── Default (fallback) book ── */
 const OL = 'https://covers.openlibrary.org/b/isbn';
 
 const DEFAULT_BOOK = {
-  cover: `${OL}/0756404738-L.jpg`,
-  genre: 'Fantasía',
-  title: 'El nombre del viento',
-  author: 'Patrick Rothfuss',
-  rating: 4.7,
-  reviews: '10.9k',
-  pages: 662,
-  year: 2007,
-  isbn: '978-84-9800-296-2',
-  synopsis: `En una posada en tierra de nadie, un hombre se dispone a relatar, por primera vez, la auténtica historia de su vida. Una historia que únicamente él conoce y que ha quedado diluida tras los rumores, las conjeturas y los cuentos de taberna que le han convertido en un personaje legendario a quien todos daban ya por muerto: Kvothe, músico, mendigo, ladrón, estudiante, mago, héroe y asesino.\n\nAhora va a revelar la verdad sobre sí mismo. Y para ello debe empezar por el principio: su infancia en una troupe de artistas itinerantes, los años malviviendo como un ladronzuelo en las calles de Tarbean y su etapa como estudiante en la Universidad.`,
+  cover: '',
+  genre: '',
+  title: '',
+  author: '',
+  rating: 0,
+  reviews: '',
+  pages: 0,
+  year: 0,
+  isbn: '',
+  synopsis: '',
 };
 
 interface ReviewData {
@@ -50,7 +51,7 @@ const reviews: ReviewData[] = [
     handle: '@carlosmendez',
     date: 'hace 5 días',
     rating: 5,
-    text: 'Increíble construcción del mundo y los personajes. Rothfuss tiene una prosa magistral. Sin duda uno de los mejores libros de fantasía que he leído.',
+    text: 'Increíble construcción del mundo y los personajes. Una prosa magistral. Sin duda uno de los mejores libros de fantasía que he leído.',
     likes: 35,
     comments: 4,
   },
@@ -60,24 +61,12 @@ const reviews: ReviewData[] = [
     handle: '@mariagarcia',
     date: 'hace 1 semana',
     rating: 4,
-    text: 'Una historia que te atrapa desde la primera página. Kvothe es un personaje fascinante y el mundo está lleno de detalles únicos.',
+    text: 'Una historia que te atrapa desde la primera página. Los personajes son fascinantes y el mundo está lleno de detalles únicos.',
     likes: 12,
     comments: 2,
   },
 ];
 
-interface AuthorBook {
-  id: number;
-  cover: string;
-  title: string;
-  year: string;
-}
-
-const authorBooks: AuthorBook[] = [
-  { id: 1, cover: `${OL}/9780756407124-L.jpg`, title: 'El Temor de un Hombre Sabio', year: '2011' },
-  { id: 2, cover: `${OL}/9780756411374-L.jpg`, title: 'El Estrecho Sendero Entre Deseos', year: '2023' },
-  { id: 3, cover: `${OL}/9780756405892-L.jpg`, title: 'La Música del Silencio', year: '1999' },
-];
 
 const recommendations: Book[] = [
   { id: 1, cover: `${OL}/9780547928227-L.jpg`,  tag: 'Fantasía',  title: 'El hobbit',                         author: 'J.R.R. Tolkien',   rating: 4.6, reviews: '3.1k', isbn: '978-84-450-7179-3', synopsis: '' },
@@ -175,7 +164,7 @@ export default function DetalleLibro({ onNavigate, book: bookProp }: DetalleLibr
   const [shelfOpen, setShelfOpen] = useState(false);
   const [savedShelf, setSavedShelf] = useState<string | null>(null);
   const [synopsisOpen, setSynopsisOpen] = useState(false);
-  const [synopsis, setSynopsis] = useState(bookProp?.synopsis ?? DEFAULT_BOOK.synopsis);
+  const [synopsis, setSynopsis] = useState(bookProp?.synopsis ?? '');
   const shelfRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(shelfRef, shelfOpen, () => setShelfOpen(false));
@@ -211,10 +200,12 @@ export default function DetalleLibro({ onNavigate, book: bookProp }: DetalleLibr
       }
     : DEFAULT_BOOK;
 
+  const { authorData } = useAuthorData(display.author, display.title);
+
   return (
     <main className={styles.page}>
 
-      {synopsisOpen && <SynopsisModal text={synopsis || DEFAULT_BOOK.synopsis} onClose={() => setSynopsisOpen(false)} />}
+      {synopsisOpen && <SynopsisModal text={synopsis} onClose={() => setSynopsisOpen(false)} />}
 
       {/* ══ Sección info libro ══ */}
       <section className={styles.infoSection}>
@@ -347,44 +338,70 @@ export default function DetalleLibro({ onNavigate, book: bookProp }: DetalleLibr
       </section>
 
       {/* ══ Más sobre el autor ══ */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Más sobre el autor</h2>
-        <div className={styles.authorCard}>
-          <div className={styles.authorPhotoWrap}>
-            <img
-              className={styles.authorPhoto}
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Patrick-rothfuss-2014-kyle-cassidy.jpg/500px-Patrick-rothfuss-2014-kyle-cassidy.jpg"
-              alt="Patrick Rothfuss"
-              onError={e => {
-                e.currentTarget.style.display = 'none';
-                const sibling = e.currentTarget.nextSibling as HTMLElement | null;
-                if (sibling) sibling.style.display = 'flex';
-              }}
-            />
-            <div className={styles.authorPhotoFallback}>PR</div>
-          </div>
-          <div className={styles.authorInfo}>
-            <h3 className={styles.authorName}>Patrick Rothfuss</h3>
-            <div className={styles.authorBioCard}>
-              <p className={styles.authorBio}>
-                Patrick James Rothfuss (Madison, 6 de junio de 1973) es un escritor estadounidense de fantasía
-                y profesor adjunto de literatura y filología inglesa de la Universidad de Wisconsin. Es el autor
-                de la serie Crónica del asesino de reyes, que fue rechazada por varias editoriales antes de que
-                el primer libro de la serie <em>El nombre del viento</em> fuese publicado en el año 2007.
-              </p>
+      {display.author && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Más sobre el autor</h2>
+          <div className={styles.authorCard}>
+            <div className={styles.authorPhotoWrap}>
+              {authorData?.photo ? (
+                <>
+                  <img
+                    className={styles.authorPhoto}
+                    src={authorData.photo}
+                    alt={display.author}
+                    onError={e => {
+                      e.currentTarget.style.display = 'none';
+                      const sibling = e.currentTarget.nextSibling as HTMLElement | null;
+                      if (sibling) sibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className={styles.authorPhotoFallback}>
+                    {display.author.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()}
+                  </div>
+                </>
+              ) : (
+                <div className={styles.authorPhotoFallback} style={{ display: 'flex' }}>
+                  {display.author.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className={styles.authorInfo}>
+              <h3 className={styles.authorName}>{display.author}</h3>
+              {authorData?.bio && (
+                <div className={styles.authorBioCard}>
+                  <p className={styles.authorBio}>{authorData.bio}</p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-        <div className={styles.authorBooksRow}>
-          {authorBooks.map(b => (
-            <div key={b.id} className={styles.authorBook} onClick={() => onNavigate?.('libro')}>
-              <img className={styles.authorBookCover} src={b.cover} alt={b.title} />
-              <p className={styles.authorBookTitle}>{b.title}</p>
-              <p className={styles.authorBookYear}>{b.year}</p>
+          {authorData?.books && authorData.books.length > 0 && (
+            <div className={styles.authorBooksRow}>
+              {authorData.books.map(b => {
+                const navBook: Book = {
+                  id: 0,
+                  cover: b.cover,
+                  tag: display.genre || 'Narrativa',
+                  title: b.title,
+                  author: display.author,
+                  rating: 0,
+                  reviews: '',
+                  isbn: '',
+                  synopsis: '',
+                  olKey: b.key,
+                  year: b.year ? parseInt(b.year) : undefined,
+                };
+                return (
+                  <div key={b.key} className={styles.authorBook} onClick={() => onNavigate?.('libro', navBook)}>
+                    <img className={styles.authorBookCover} src={b.cover} alt={b.title} />
+                    <p className={styles.authorBookTitle}>{b.title}</p>
+                    {b.year && <p className={styles.authorBookYear}>{b.year}</p>}
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
-      </section>
+          )}
+        </section>
+      )}
 
       {/* ══ Recomendaciones ══ */}
       <section className={styles.section}>

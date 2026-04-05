@@ -13,6 +13,7 @@ export default function App() {
   const [scrolled, setScrolled] = useState(false);
   const [currentPage, setCurrentPage] = useState('explorar');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [bookKey, setBookKey] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -21,7 +22,10 @@ export default function App() {
   }, []);
 
   const navigate = (page: string, book?: Book) => {
-    if (book) setSelectedBook(book);
+    if (book) {
+      setSelectedBook(book);
+      setBookKey(k => k + 1);
+    }
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -33,7 +37,7 @@ export default function App() {
       {currentPage === 'explorar'    && <Explorar onNavigate={navigate} />}
       {currentPage === 'biblioteca'  && <MiBiblioteca onNavigate={navigate} />}
       {currentPage === 'estanteria'  && <EstanteriaCompleta onNavigate={navigate} />}
-      {currentPage === 'libro'       && <DetalleLibro onNavigate={navigate} book={selectedBook ?? undefined} />}
+      {currentPage === 'libro'       && <DetalleLibro key={bookKey} onNavigate={navigate} book={selectedBook ?? undefined} />}
       {currentPage === 'comunidad'   && (
         <main style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '12px', color: 'var(--color-text-secondary)', fontFamily: 'var(--font-ui)' }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>

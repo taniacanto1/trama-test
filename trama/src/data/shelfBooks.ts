@@ -6,16 +6,12 @@ export interface ShelfBook {
   shelf: string;
 }
 
-export interface ShelfFilter {
-  label: string;
-  count: number;
-}
 
 const OL = 'https://covers.openlibrary.org/b/isbn';
 
 export const shelfBooks: ShelfBook[] = [
   /* ── Leyendo ── */
-  { id:  1, cover: `${OL}/0756404738-L.jpg`,      title: 'El nombre del viento',               author: 'Patrick Rothfuss',         shelf: 'Leyendo' },
+  { id:  1, cover: `${OL}/9780451166890-L.jpg`,   title: 'Los pilares de la tierra',           author: 'Ken Follett',              shelf: 'Leyendo' },
   { id:  2, cover: `${OL}/9780441013593-L.jpg`,   title: 'Dune',                               author: 'Frank Herbert',             shelf: 'Leyendo' },
   { id:  3, cover: `${OL}/9780062316110-L.jpg`,   title: 'Sapiens',                            author: 'Yuval Noah Harari',         shelf: 'Leyendo' },
   { id:  4, cover: `${OL}/9780060850524-L.jpg`,   title: 'Un mundo feliz',                     author: 'Aldous Huxley',             shelf: 'Leyendo' },
@@ -74,11 +70,4 @@ export const shelfBooks: ShelfBook[] = [
   { id: 54, cover: `${OL}/9780375725845-L.jpg`,   title: 'El perfume',                         author: 'Patrick Süskind',           shelf: 'No acabado' },
   { id: 55, cover: `${OL}/9780060932138-L.jpg`,   title: 'La insoportable levedad del ser',    author: 'Milan Kundera',             shelf: 'No acabado' },
   { id: 56, cover: `${OL}/9780151446476-L.jpg`,   title: 'El nombre de la rosa',               author: 'Umberto Eco',               shelf: 'No acabado' },
-];
-
-export const SHELF_FILTERS: ShelfFilter[] = [
-  { label: 'Quiero leer', count: 14 },
-  { label: 'Leyendo',     count: 14 },
-  { label: 'Acabado',     count: 14 },
-  { label: 'No acabado',  count: 14 },
 ];

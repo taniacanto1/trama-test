@@ -250,10 +250,9 @@
   font-weight: var(--weight-bold);
   color: var(--color-text-primary);
   line-height: 1.25;
+  white-space: nowrap;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
 }
 
 .bookAuthor {
