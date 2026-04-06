@@ -84,11 +84,12 @@ Usadas para estados interactivos con énfasis de marca (hover, active, selected)
 
 Usadas para elementos sin énfasis de marca: chevrones, badges de conteo, fondos de superficie neutral.
 
-| Token                         | Valor                       |
-|-------------------------------|-----------------------------|
-| `--color-neutral-alpha-subtle`| `rgba(44, 36, 32, 0.06)`    |
-| `--color-neutral-alpha-muted` | `rgba(44, 36, 32, 0.08)`    |
-| `--color-neutral-alpha-medium`| `rgba(44, 36, 32, 0.14)`    |
+| Token                          | Valor                       |
+|--------------------------------|-----------------------------|
+| `--color-neutral-alpha-light`  | `rgba(44, 36, 32, 0.04)`    |
+| `--color-neutral-alpha-subtle` | `rgba(44, 36, 32, 0.06)`    |
+| `--color-neutral-alpha-muted`  | `rgba(44, 36, 32, 0.08)`    |
+| `--color-neutral-alpha-medium` | `rgba(44, 36, 32, 0.14)`    |
 
 > **Regla:** usar `brand-alpha-*` cuando el elemento comunica una acción de marca. Usar `neutral-alpha-*` para chrome/UI sin relevancia de marca (filtros, conteos, separadores).
 
@@ -109,14 +110,15 @@ Usadas para elementos sin énfasis de marca: chevrones, badges de conteo, fondos
 
 ### Superficies
 
-| Token                   | Valor                        |
-|-------------------------|------------------------------|
-| `--color-bg-page`       | `#FAFAF8`                    |
-| `--color-bg-section`    | `#f5f2ee`                    |
-| `--color-bg-card`       | `rgba(255, 255, 255, 0.72)`  |
-| `--color-bg-card-solid` | `#ffffff`                    |
-| `--color-bg-overlay`    | `rgba(244, 238, 233, 0.85)`  |
-| `--color-bg-synopsis`   | `rgba(252, 242, 236, 0.85)`  |
+| Token                       | Valor                        |
+|-----------------------------|------------------------------|
+| `--color-bg-page`           | `#FAFAF8`                    |
+| `--color-bg-section`        | `#f5f2ee`                    |
+| `--color-surface-secondary` | `#f0ece8`                    |
+| `--color-bg-card`           | `rgba(255, 255, 255, 0.72)`  |
+| `--color-bg-card-solid`     | `#ffffff`                    |
+| `--color-bg-overlay`        | `rgba(244, 238, 233, 0.85)`  |
+| `--color-bg-synopsis`       | `rgba(252, 242, 236, 0.85)`  |
 
 ### Texto
 
@@ -207,23 +209,23 @@ Grid de 4px. Nomenclatura: `--space-{n}` donde el valor es `n × 4px`.
 
 ## Layout
 
-| Token                | Valor                  |
-|----------------------|------------------------|
-| `--navbar-height`    | 56px                   |
-| `--page-max-width`   | 1200px                 |
-| `--page-padding-x`   | 40px (responsive)      |
-| `--page-padding-y`   | 48px                   |
-| `--page-top-padding` | 120px → 80px mobile    |
-| `--grid-cols`        | 3 → 2 → 1 (responsive) |
-| `--cover-size`       | 174px → 120px mobile   |
+| Token                | Valor                       |
+|----------------------|-----------------------------|
+| `--navbar-height`    | 56px                        |
+| `--page-max-width`   | 1200px                      |
+| `--page-padding-x`   | 40px (responsive)           |
+| `--page-padding-y`   | 48px → 24px (sm)            |
+| `--page-top-padding` | 120px → 80px (sm)           |
+| `--grid-cols`        | 3 → 2 (lg) → 1 (sm)        |
+| `--cover-size`       | 174px → 160px (lg) → 120px (sm) |
 
 ### Breakpoints
 
-| Nombre | Valor  | Cambios principales                        |
-|--------|--------|--------------------------------------------|
-| lg     | 1024px | `--page-padding-x` a 24px, grid a 2 cols  |
-| md     | 768px  | `--page-padding-x` a 20px                 |
-| sm     | 640px  | `--page-padding-x` a 16px, grid a 1 col   |
+| Nombre | Valor  | Cambios principales                                                            |
+|--------|--------|--------------------------------------------------------------------------------|
+| lg     | 1024px | `--page-padding-x` a 24px, `--grid-cols` a 2, `--cover-size` a 160px          |
+| md     | 768px  | `--page-padding-x` a 20px                                                      |
+| sm     | 640px  | `--page-padding-x` a 16px, `--page-padding-y` a 24px, `--page-top-padding` a 80px, `--grid-cols` a 1, `--cover-size` a 120px |
 
 > La página **Explorar** usa `padding-top: var(--space-20)` (80px) en lugar del token global `--page-top-padding` (120px) porque su hero requiere menos separación del navbar.
 
@@ -252,9 +254,25 @@ Componente `StarRating` en DetalleLibro. Colores:
 
 ---
 
+## Clases globales de utilidad
+
+Definidas en `index.css` y disponibles en todos los módulos.
+
+| Clase                  | Descripción                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| `.is-loading`          | Oculta el texto del elemento y muestra un spinner de 16px centrado          |
+| `.empty-state`         | Contenedor centrado para estados vacíos (flex-column, gap `--space-3`)      |
+| `.empty-state__icon`   | Icono 48×48px en `--color-text-tertiary`                                    |
+| `.empty-state__title`  | Título de estado vacío: `--text-lg`, `--weight-semibold`                    |
+| `.empty-state__text`   | Texto descriptivo: `--text-md`, `--color-text-secondary`, max-width 320px   |
+
+---
+
 ## Decisiones de diseño registradas
 
 - **`--color-error: #b83232`** — rojo oscuro para acciones peligrosas. Intencional: el color oscuro desincentiva el clic.
 - **`--text-base: 16px`** — añadido como token para BookCard titles. La escala estándar saltaba de 15px a 18px sin incluir 16px, valor deliberado de diseño.
 - **`--font-editorial`** — el token usa `'Crimson'` (sin "Text") como nombre de familia. Google Fonts sirve la fuente como "Crimson Text" pero la familia CSS se resuelve correctamente; el fallback es `Georgia, serif`.
 - **Alpha families distintas** — `--color-brand-alpha-*` (naranja) para estados con marca vs `--color-neutral-alpha-*` (oscuro neutro) para chrome sin énfasis. Confundirlos produce tintes naranjas indeseados en elementos neutros.
+- **`--color-neutral-alpha-light: rgba(44, 36, 32, 0.04)`** — nivel por debajo de `subtle` (0.06). Usado para hover/active pasivos (p.ej. leyenda de donut) donde un fondo muy tenue es suficiente.
+- **`--color-surface-secondary: #f0ece8`** — tono cálido intermedio entre `--color-bg-section` (#f5f2ee) y `--color-border-medium`. Usado para skeleton loaders y fondos de fallback en portadas sin imagen.

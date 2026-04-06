@@ -39,6 +39,7 @@
 
   /* Alpha variants neutral — UI elements sin énfasis de marca
      (chevrones, badges de conteo, fondos de superficie) */
+  --color-neutral-alpha-light:  rgba(44, 36, 32, 0.04);
   --color-neutral-alpha-subtle: rgba(44, 36, 32, 0.06);
   --color-neutral-alpha-muted:  rgba(44, 36, 32, 0.08);
   --color-neutral-alpha-medium: rgba(44, 36, 32, 0.14);
@@ -66,6 +67,7 @@
   --color-bg-card-solid: #ffffff;
   --color-bg-overlay:    rgba(244, 238, 233, 0.85);
   --color-bg-synopsis:   rgba(252, 242, 236, 0.85);
+  --color-surface-secondary: #f0ece8;
 
   /* ----------------------------------------------------------
      TEXTO
