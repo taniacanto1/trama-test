@@ -211,7 +211,7 @@ Grid de 4px. Nomenclatura: `--space-{n}` donde el valor es `n × 4px`.
 
 | Token                | Valor                       |
 |----------------------|-----------------------------|
-| `--navbar-height`    | 56px                        |
+| `--navbar-height`    | 50px                        |
 | `--page-max-width`   | 1200px                      |
 | `--page-padding-x`   | 40px (responsive)           |
 | `--page-padding-y`   | 48px → 24px (sm)            |
@@ -240,6 +240,13 @@ Todos los enlaces "Ver más" en secciones usan el mismo estilo:
 - Tamaño: `--text-sm`
 - Icono: chevron derecho SVG 14×14px
 - Sin text-decoration
+
+### Navbar — estructura y comportamiento
+
+- **Altura:** `max-height: 50px`, `padding: 8px 28px`
+- **Links de navegación:** centrados absolutamente (`position: absolute; left: 50%`) para alinearse con los títulos de página centrados
+- **Botón "Registrar lectura":** estado colapsado — círculo `34×34px` (`border-radius: pill`) mostrando solo el icono `+`. En hover se expande horizontalmente a `max-width: 180px` revelando el texto, con `border-radius: var(--radius-lg)`. Transición de 300ms.
+- **Iconos de acción** (campana, avatar): `34×34px` y `32×32px` respectivamente, `border-radius: pill`
 
 ### Estrellas de valoración
 Componente `StarRating` en DetalleLibro. Colores:

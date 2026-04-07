@@ -76,7 +76,7 @@ export default function NavbarFull({ hidden, currentPage, onNavigate }: NavbarFu
       <div className={styles.navActions}>
         <button className={styles.registerBtn}>
           <PlusIcon />
-          Registrar lectura
+          <span className={styles.registerBtnText}>Registrar lectura</span>
         </button>
         <button className={styles.iconBtn}><BellIcon /></button>
         <div className={styles.avatar}>T</div>
