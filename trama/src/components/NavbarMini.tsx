@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import styles from './NavbarMini.module.css';
 
@@ -30,6 +31,14 @@ const ITEMS: NavItem[] = [
   { label: 'Comunidad',  page: 'comunidad',  icon: <PeopleIcon /> },
 ];
 
+const STYLES = ['glass', 'warm', 'dark'] as const;
+type PillStyle = typeof STYLES[number];
+const STYLE_LABELS: Record<PillStyle, string> = {
+  glass: 'A · Glass blur',
+  warm:  'B · Naranja',
+  dark:  'C · Oscuro',
+};
+
 const activePage = (current: string) => current === 'libro' ? 'explorar' : current;
 
 interface NavbarMiniProps {
@@ -39,20 +48,36 @@ interface NavbarMiniProps {
 }
 
 export default function NavbarMini({ visible, currentPage, onNavigate }: NavbarMiniProps) {
+  const [pillStyle, setPillStyle] = useState<PillStyle>('glass');
   const active = activePage(currentPage);
 
   return (
-    <nav className={`${styles.navbar} ${styles.glass} ${visible ? styles.visible : ''}`}>
-      {ITEMS.map(({ label, page, icon }) => (
-        <button
-          key={page}
-          className={`${styles.item} ${active === page ? styles.itemActive : ''}`}
-          onClick={() => onNavigate(page)}
-        >
-          {icon}
-          <span className={styles.label}>{label}</span>
-        </button>
-      ))}
-    </nav>
+    <>
+      <div className={styles.optionBar}>
+        <label>Pill style</label>
+        {STYLES.map(s => (
+          <button
+            key={s}
+            className={pillStyle === s ? styles.active : ''}
+            onClick={() => setPillStyle(s)}
+          >
+            {STYLE_LABELS[s]}
+          </button>
+        ))}
+      </div>
+
+      <nav className={`${styles.navbar} ${styles[pillStyle]} ${visible ? styles.visible : ''}`}>
+        {ITEMS.map(({ label, page, icon }) => (
+          <button
+            key={page}
+            className={`${styles.item} ${active === page ? styles.itemActive : ''}`}
+            onClick={() => onNavigate(page)}
+          >
+            {icon}
+            <span className={styles.label}>{label}</span>
+          </button>
+        ))}
+      </nav>
+    </>
   );
 }

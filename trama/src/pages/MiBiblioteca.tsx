@@ -353,11 +353,11 @@ function Listas({ collageBooks }: ListasProps) {
   );
 }
 
-interface ProgresosProps {
+interface ProgresosProps extends NavigateProps {
   genreBooks: Record<string, Book[]>;
 }
 
-function Progresos({ genreBooks }: ProgresosProps) {
+function Progresos({ genreBooks, onNavigate }: ProgresosProps) {
   const maxPages = Math.max(...weekActivity.map(d => d.pages));
   const totalWeekPages = weekActivity.reduce((sum, d) => sum + d.pages, 0);
   const todayIdx = weekActivity.findIndex(d => d.today);
@@ -442,7 +442,12 @@ function Progresos({ genreBooks }: ProgresosProps) {
               {selectedGenre && (
                 <div className={styles.genreBooksPanel}>
                   {(genreBooks[selectedGenre] ?? []).slice(0, 6).map(book => (
-                    <div key={book.id} className={styles.genreBookItem}>
+                    <div
+                      key={book.id}
+                      className={styles.genreBookItem}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => onNavigate?.('libro', book)}
+                    >
                       <img className={styles.genreBookCover} src={book.cover} alt={book.title} />
                       <div className={styles.genreBookInfo}>
                         <p className={styles.genreBookTitle}>{book.title}</p>
@@ -506,7 +511,7 @@ export default function MiBiblioteca({ onNavigate }: NavigateProps) {
         onVerTodo={() => onNavigate?.('estanteria')}
       />
       <Listas collageBooks={collageBooks} />
-      <Progresos genreBooks={genreBooks} />
+      <Progresos genreBooks={genreBooks} onNavigate={onNavigate} />
     </main>
   );
 }
