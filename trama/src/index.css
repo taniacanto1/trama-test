@@ -29,9 +29,6 @@
   --color-brand-muted:   #e8a882;
   --color-brand-deep:    #A83D0A;
   --color-brand-ember:   #C44E12;
-  --color-accent:        #C68A2E;
-  --color-accent-light:  #f7ead8;
-
   /* Alpha variants brand — hover (0.06), active (0.08), selected (0.12) */
   --color-brand-alpha-subtle: rgba(232, 107, 48, 0.06);
   --color-brand-alpha-muted:  rgba(232, 107, 48, 0.08);
